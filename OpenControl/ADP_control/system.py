@@ -1,6 +1,6 @@
 import numpy as np  
 from scipy import integrate
-from .visualize import Logger
+from .. import visualize
 
 class LTI():
     """
