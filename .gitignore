@@ -1,0 +1,4 @@
+.vscode
+OpenControl/ADP_control/__pycache__
+docs/_build
+*.ipynb
