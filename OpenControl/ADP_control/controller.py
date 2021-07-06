@@ -389,16 +389,16 @@ class NonLinController():
             - num_data >= n(n+1) + 2mn
         """
         if q_func==None:
-            self.q_func = nonLinController.default_q_func
+            self.q_func = NonLinController.default_q_func
         else:   self.q_func = q_func                # positive definite function
         if R==None:
             self.R = np.eye(self.system.dimension[1])
         else:   self.R = R                # symmetric and positive definite matix (1x(mxm))
         if phi_func==None:
-            self.phi_func = nonLinController.default_phi_func
+            self.phi_func = NonLinController.default_phi_func
         else:   self.phi_func = phi_func    # basis function for value function
         if psi_func==None:
-            self.psi_func = nonLinController.default_psi_func
+            self.psi_func = NonLinController.default_psi_func
         else:   self.psi_func = psi_func    # basis function for policy function        
         self.u0 = u0                
         self.data_eval = data_eval

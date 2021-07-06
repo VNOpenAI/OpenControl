@@ -33,9 +33,9 @@ extensions = [
     'sphinx.ext.autosummary'
 ]
 
-extensions.append['autoapi.extension']
-autoapi_type = 'python'
-autoapi_dirs = ['../ADP_control']
+# extensions.append['autoapi.extension']
+# autoapi_type = 'python'
+# autoapi_dirs = ['../OpenControl/ADP_control']
 
 imgmath_image_format = 'svg'
 
