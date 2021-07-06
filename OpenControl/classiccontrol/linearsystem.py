@@ -223,7 +223,7 @@ class LTI():
             out = self._A @ x.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1))
             return out.ravel()
         def function_out(t,x):      
-            return self._C @ x + self._D @ input_function(t) 
+            return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
 
         i_old = time_start 
         time_array = np.linspace(time_start+sample_time,time_stop,int((time_stop-time_start)//sample_time))
@@ -235,6 +235,7 @@ class LTI():
             x0 = result.y.T[-1]  #x0 shape (n,)
             i_old = i
             x_out.append(x0) 
+            
         if self._C is not None:
             y_out = [function_out(i,x) for x in x_out]
             y_out = np.array(y_out)
@@ -300,7 +301,7 @@ class LTI():
         return R
         
 
-    def apply_state_feedback(self,R,t_sim = (0,10), sample_time=0.1,save_fig='apply_state_feedback'):
+    def apply_state_feedback(self,R):
         """[summary]
 
         Args:
@@ -313,11 +314,9 @@ class LTI():
         Returns:
             [type]: [description]
         """
-        time_start = t_sim[0]
-        time_stop = t_sim[-1]
         A_old = self._A 
         self._A = self._A - self._B@R
-        out =  self.step_response(time_start=time_start, time_stop=time_stop, sample_time=sample_time,file_png=save_fig)
+        out =  self.step_response()
         self._A = A_old 
         return out
         

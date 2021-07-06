@@ -3,20 +3,6 @@ from abc import ABC,abstractmethod
 import math
 import scipy.linalg
 import random
-class Controller():
-    
-    @abstractmethod
-    def __init__(self):
-        pass 
-
-    def simulink():
-        pass 
-
-class StateFeedBackController():
-    pass
-
-
-
 def get_coefficient(s):
     #s =set(s)
     
@@ -35,12 +21,10 @@ def get_coefficient(s):
             A[i,j] = math.pow(giatri,j)
         b[i][0]=tich 
     x = scipy.linalg.pinv(A)@b
-    print(A)
-    print(b)
     return x
     
 
-class PoleStatement(StateFeedBackController):
+class PoleStatement():
     algorithms = ['Ropernecker','Arckerman']
     def __init__(self,pole,system,algo):
         """[summary]
@@ -51,16 +35,14 @@ class PoleStatement(StateFeedBackController):
             algo ([strings]): []
         """
         assert algo in ['Ropernecker','Arckerman'], "algo must be in list of ['Ropernecker','Arckerman']"
-        self.pole = pole 
+        self.pole = pole
+        self.pole.sort() 
         self.algo = algo  
         self.system = system
 
     def Roppernecker(self,):
 
-        controlability = self.system.is_controlable()
-        if not controlability:
-            print('system is not controlable')
-            return None
+        
         if self.system._B is None:
             raise ValueError('matrix B must be provided')
         eigvals,eigvectors = np.linalg.eig(self.system.A)
@@ -73,21 +55,15 @@ class PoleStatement(StateFeedBackController):
             if s in eigvals:
                 a.append(eigvectors[:,index].reshape(-1,1))
                 t_index = np.zeros((self.system.inputs_shape,1))
-                #t_index[index] = 1
                 t.append(t_index)
-                print(f'{s} in {eigvals}')
-                #eigvals.remove(s)
-                #print('yes:', eigvectors[:,index].reshape(-1,1))
+
             else:
                 a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B)
                 t_index = np.ones((self.system.inputs_shape,1))
                 t.append(t_index)
-                #print('yes:', eigvectors[:,index].reshape(-1,1))
                 
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
-        print(t)
-        print(a)
         R = - t @ np.linalg.inv(a)
         return R
 
@@ -115,7 +91,6 @@ class PoleStatement(StateFeedBackController):
         coefficient = get_coefficient(self.pole).reshape(-1)
         coefficient = coefficient.tolist()
         coefficient.append(1)
-        print(coefficient)
         for i in range(ndim+1):
             coeffi = coefficient[i]          
             S += coeffi*(s@np.linalg.matrix_power(A,i))
@@ -123,3 +98,12 @@ class PoleStatement(StateFeedBackController):
 
 
 
+    def compute(self):
+        controlability = self.system.is_controlable()
+        if not controlability:
+            print('system is not controlable')
+            return None
+        if self.algo =='Arckerman':
+            return self.Arckerman()
+        else: 
+            return self.Roppernecker()
