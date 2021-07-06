@@ -24,6 +24,13 @@ def get_coefficient(s):
     return x
     
 
+class StateFeedBackController(ABC):
+
+    @abstractmethod()
+    def compute(self):
+        pass
+
+
 class PoleStatement():
     algorithms = ['Ropernecker','Arckerman']
     def __init__(self,pole,system,algo):
@@ -107,3 +114,19 @@ class PoleStatement():
             return self.Arckerman()
         else: 
             return self.Roppernecker()
+
+class LQR():
+
+    def __init__(self,system,E,F):
+        self.system = system
+        self.E = E 
+        self.F = F 
+    
+    def compute(self):
+        q = self.E 
+        a = self.system.A
+        b = self.system.B
+        r = self.F 
+        P = scipy.linalg.solve_continuous_are(a=a,b=b,q=q,r=r)
+        R = scipy.linalg.pinv(self.F)@(self.system.B.T)@P 
+        return R
