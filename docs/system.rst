@@ -59,13 +59,13 @@ then setup a simulation section, see `setup a simulation section`_
 
 
 
-.. autoclass:: OpenControl.ADP_control.LTI
+.. .. autoclass:: OpenControl.ADP_control.LTI
     :members:
     :undoc-members:
     :show-inheritance:
     :special-members: __init__
 
-.. autoclass:: OpenControl.ADP_control.NonLin
+.. .. autoclass:: OpenControl.ADP_control.NonLin
     :members:
     :undoc-members:
     :show-inheritance:

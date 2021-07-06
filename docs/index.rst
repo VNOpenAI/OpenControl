@@ -57,6 +57,13 @@ Please see the `Developer's Wiki`_ for detailed instructions.
 - Issue tracker: https://github.com/VNOpenAI/OpenControl/issues
 
 
+Quick-start
+============================
+
+For quick tutorials and application, please review the `Colab Notebook`_
+
+.. _`Colab Notebook`: https://colab.research.google.com/drive/10mYMDliuOZD5i-YqmD9noOL8JDhC6t3x?usp=sharing
+
 Indices and tables
 ==================
 
