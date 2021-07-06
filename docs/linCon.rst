@@ -77,24 +77,24 @@ Algorithm
 
 .. image:: _static/LinearOnPolicy.png
 
-Examples
+Library Usage
 ----------------------------------------------------------------
 
 Setup a simulation _`section` with :class:`ADP_control.controller.LTIController` and :func:`ADP_control.controller.LTIController.setPolicyParam` then perform simulation by :func:`ADP_control.controller.LTIController.onPolicy`
 
 .. code-block:: python
 
-    from ADP_control import LTIController
+    from OpenControl.ADP_control import LTIController
 
-    controller = LTIController(sys)
+    Ctrl = LTIController(sys)
     # set parameters for policy
     Q = np.eye(3); R = np.array([[1]]); K0 = np.zeros((1,3))
     explore_noise=lambda t: 2*np.sin(10*t)
     data_eval = 0.1; num_data = 10
 
-    controller.setPolicyParam(K0=K0, Q=Q, R=R, data_eval=data_eval, num_data=num_data, explore_noise=explore_noise)
+    Ctrl.setPolicyParam(K0=K0, Q=Q, R=R, data_eval=data_eval, num_data=num_data, explore_noise=explore_noise)
     # take simulation and get the results
-    K, P = controller.onPolicy()
+    K, P = Ctrl.onPolicy()
 
 
 Off-policy learning 
@@ -126,22 +126,16 @@ Algorithm
 
 .. image:: _static/LinearOffPolicy.png
 
-Examples
+Library Usage
 ----------------------------------------------------------------
 
 Setup a simulation section the same as the `section`_ then perform simulation by :func:`ADP_control.controller.LTIController.offPolicy`
 
 .. code-block:: python
 
-    K, P = controller.offPolicy()
+    K, P = Ctrl.offPolicy()
 
-.. autoclass:: ADP_control.controller.LTIController
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :special-members: __init__
-
-.. autoclass:: ADP_control.controller.nonLinController
+.. autoclass:: OpenControl.ADP_control.LTIController
     :members:
     :undoc-members:
     :show-inheritance:

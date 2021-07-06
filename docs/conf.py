@@ -30,9 +30,10 @@ author = 'PhiDCH'
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx', 'sphinx.ext.imgmath',
-    'sphinx.ext.autosummary', 'autoapi.extension'
+    'sphinx.ext.autosummary'
 ]
 
+extensions.append['autoapi.extension']
 autoapi_type = 'python'
 autoapi_dirs = ['../ADP_control']
 

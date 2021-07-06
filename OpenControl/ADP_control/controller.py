@@ -1,8 +1,8 @@
 import numpy as np
 from scipy import integrate
 from control import lqr
-from .visualize import Logger
-from .system import LTI,nonLin
+from ..visualize import Logger
+from .system import LTI,NonLin
 
 class LTIController():
     """This present continuous controller for LTI System
@@ -341,7 +341,7 @@ class LTIController():
         return dxx_, Ixx_, Ixu_
 
 
-class nonLinController():
+class NonLinController():
     """This present continuous controller for Non-Linear System
     
         Attributes:

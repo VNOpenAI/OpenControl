@@ -59,26 +59,18 @@ then setup a simulation section, see `setup a simulation section`_
 
 
 
-.. autoclass:: ADP_control.system.LTI
+.. autoclass:: OpenControl.ADP_control.LTI
     :members:
     :undoc-members:
     :show-inheritance:
     :special-members: __init__
 
-.. autoclass:: ADP_control.system.nonLin
+.. autoclass:: OpenControl.ADP_control.NonLin
     :members:
     :undoc-members:
     :show-inheritance:
     :special-members: __init__
 
-Problem solving
-========================
 
-.. math:: 
-    e^{i\pi} + 1 = 0
-    :label: euler
-
-Euler's identity, equation :eq:`euler`, was elected one of the most
-beautiful mathematical formulas.
 
  

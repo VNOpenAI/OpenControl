@@ -1,1 +1,1 @@
-from . import visualize
+from .visualize import Logger

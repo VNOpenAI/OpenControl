@@ -1,5 +1,7 @@
 .vscode
 OpenControl/ADP_control/__pycache__
+OpenControl/visualize/__pycache__
+OpenControl/classiccontrol/__pycache__
+OpenControl/__pycache__
 docs/_build
 *.ipynb
-OpenControl/classiccontrol/__pycache__
