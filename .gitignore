@@ -3,3 +3,6 @@ OpenControl/ADP_control/__pycache__
 docs/_build
 *.ipynb
 OpenControl/classiccontrol/__pycache__
+logs
+OpenControl/visualize/__pycache__/
+__pycache__/
