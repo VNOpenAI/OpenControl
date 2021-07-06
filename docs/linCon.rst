@@ -13,7 +13,7 @@ Given the linear system equation :eq:`LTI`, design a linear quadratic regulator 
 
 where :math:`Q=Q^T \geq 0, R=R^T > 0`. 
 
-The solution of this problem is :math:`K*` which is also the solution of the `Riccati equation`_, can be obtained by :func:`ADP_control.controller.LTIController.LQR`. However, this approach requires the knowledge of the system dynamic (the matrix ``A`` and ``B``). The **model-free** approach below will resolve this problem.
+The solution of this problem is :math:`K*` which is also the solution of the `Riccati equation`_, can be obtained by :func:`OpenControl.ADP_control.LTIController.LQR`. However, this approach requires the knowledge of the system dynamic (the matrix ``A`` and ``B``). The **model-free** approach below will resolve this problem.
 
 .. _`Riccati equation`: https://en.wikipedia.org/wiki/Algebraic_Riccati_equation
 
@@ -70,7 +70,7 @@ where
         rank(\Theta_k) = \frac{n(n+1)}{2} + mn
 
     - In practical, :math:`l \geq n(n+1) + 2mn`
-    - The time interval for each learning section is :math:`l \cdot \delta t`, so properly set :attr:`ADP_control.controller.LTIController.num_data` and :attr:`ADP_control.controller.LTIController.data_eval` to make sure the learning section not too slow
+    - The time interval for each learning section is :math:`l \cdot \delta t`, so properly set :attr:`OpenControl.ADP_control.LTIController.num_data` and :attr:`OpenControl.ADP_control.LTIController.data_eval` to make sure the learning section not too slow
   
 Algorithm
 ----------------------------------------------------------------
@@ -80,7 +80,7 @@ Algorithm
 Library Usage
 ----------------------------------------------------------------
 
-Setup a simulation _`section` with :class:`ADP_control.controller.LTIController` and :func:`ADP_control.controller.LTIController.setPolicyParam` then perform simulation by :func:`ADP_control.controller.LTIController.onPolicy`
+Setup a simulation _`section` with :class:`OpenControl.ADP_control.LTIController` and :func:`OpenControl.ADP_control.LTIController.setPolicyParam` then perform simulation by :func:`OpenControl.ADP_control.LTIController.onPolicy`
 
 .. code-block:: python
 
@@ -129,7 +129,7 @@ Algorithm
 Library Usage
 ----------------------------------------------------------------
 
-Setup a simulation section the same as the `section`_ then perform simulation by :func:`ADP_control.controller.LTIController.offPolicy`
+Setup a simulation section the same as the `section`_ then perform simulation by :func:`OpenControl.ADP_control.LTIController.offPolicy`
 
 .. code-block:: python
 

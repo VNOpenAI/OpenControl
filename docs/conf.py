@@ -17,8 +17,8 @@ sys.path.insert(0, os.path.abspath('..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Approximate Dynamic Programming'
-copyright = '2021, PhiDCH'
+project = 'OpenControl'
+copyright = '2021, VNOpenAI'
 author = 'PhiDCH'
 
 
@@ -30,12 +30,12 @@ author = 'PhiDCH'
 extensions = [
     'sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx', 'sphinx.ext.imgmath',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary', 'autoapi.extension'
 ]
 
 # extensions.append['autoapi.extension']
-# autoapi_type = 'python'
-# autoapi_dirs = ['../OpenControl/ADP_control']
+autoapi_type = 'python'
+autoapi_dirs = ['../OpenControl']
 
 imgmath_image_format = 'svg'
 

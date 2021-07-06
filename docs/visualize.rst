@@ -36,6 +36,12 @@ Analysis simulation on Tensorboard
 
         %tensorboard --logdir results
 
+Usage
+================================
+
+.. image:: _static/TensorboardUsage.png
+
+    
 
 .. autoclass:: OpenControl.visualize.Logger
     :members:

@@ -2,7 +2,7 @@
 Non-Linear ADP Controller
 *************************
 
-Problems statements
+Problem statements
 ================================================================
 
 Given the nonlinear system equation :eq:`nonLin`, design a control policy :math:`u(t)` that minimize the following cost function:
