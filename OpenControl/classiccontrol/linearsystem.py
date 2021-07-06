@@ -1,6 +1,8 @@
 import numpy as np
 from numpy.testing._private.utils import assert_array_max_ulp 
 from scipy import integrate
+import scipy.linalg
+import scipy
 from . import bibo
 import matplotlib.pyplot as plt
 class LTI():
@@ -44,7 +46,7 @@ class LTI():
         #self._x0 = kwargs.get('x0')
         #if self._x0 is not None:
         #    self._x0 = self._x0.reshape(-1,1)
-        self.max_step = kwargs.get('max_step')
+        self._max_step = kwargs.get('max_step')
         
     @property
     def states_shape(self,) -> int:
@@ -66,7 +68,7 @@ class LTI():
             return None
     @property
     def max_step(self):
-        return self.max_step
+        return self._max_step
 
     @property
     def A(self,):
@@ -177,11 +179,6 @@ class LTI():
         else: 
             return False
 
-    def initialize_state(self, x0):
-        assert type(x0) is np.ndarray, "Invalid type, x0 must be numpy.ndarray"
-        x0.shape = (-1,1)
-        assert x0.shape[0]==self._states_shape, f"Invalid dimension, system got the states_shape = {self._states_shape}"
-        self._x0 = x0
 
     def setup_simulink(self, max_step=1e-3, algo='RK45', t_sim=(0,10), x0=None, sample_time = 1e-2):
         # fixed step_size
@@ -201,18 +198,20 @@ class LTI():
         assert x0.shape[0]==self._states_shape, f"Invalid dimension, system got the states_shape = {self._states_shape}"
         self._x0 = x0
 
-        self.max_step = max_step
+        self._max_step = max_step
 
         assert algo in ['RK45', 'RK23', 'DOP853'], "Invalid keyworks, algo must be in ['RK45', 'RK23', 'DOP853']"
         self.algo = algo
         self.t_sim = t_sim
         if np.all(x0==None):
-            self.x0 = np.ones((self.dimension[0],))
+            self.x0 = np.ones((self.dimension[0],1))
         else: 
-            self.x0 = x0
+            self._x0 = x0
+        assert type(x0) is np.ndarray, "x0 must be np.ndarray"
+        assert x0.shape==(self.dimension[0],1), "invalid shape of"
         self.sample_time = sample_time
 
-    def step_response(self,input_function,logs_file =None):
+    def step_response(self,input_function=None,logs_file =None):
         sample_time = self.sample_time 
         time_start = self.t_sim[0]
         time_stop = self.t_sim[-1]      
@@ -223,8 +222,7 @@ class LTI():
         def function_x (t,x):
             out = self._A @ x.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1))
             return out.ravel()
-        def function_out(t,x):
-            
+        def function_out(t,x):      
             return self._C @ x + self._D @ input_function(t) 
 
         i_old = time_start 
@@ -233,7 +231,7 @@ class LTI():
         x_out = []
         for i in time_array:
             #print(x0.shape)
-            result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),max_step=self.max_step)
+            result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),max_step=self.max_step,method=self.algo)
             x0 = result.y.T[-1]  #x0 shape (n,)
             i_old = i
             x_out.append(x0) 
@@ -296,8 +294,8 @@ class LTI():
                 
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
-        #print(t)
-        #print(a)
+        print(t)
+        print(a)
         R = - t @ np.linalg.inv(a)
         return R
         
