@@ -6,13 +6,15 @@ import scipy
 from . import bibo
 import matplotlib.pyplot as plt
 class LTI():
+    """[summary]
 
+    Raises:
+        ValueError: [description]
+        ValueError: [description]
 
-    bibo_algorithm = [
-        "gerschgorin",# : bibo.Gerschgorin,
-        "lyapunov" ,#: bibo.Lyapunov,
-        "hurwitz" ,
-    ]
+    Returns:
+        [type]: [description]
+    """
     bibo_result = {
         -1 : "System is not stable",
         0 : "Unable to conclude about system's stability",
@@ -20,7 +22,17 @@ class LTI():
     }
 
     def __init__(self,**kwargs):
-        """[summary]
+        """constructor of LTI system
+        
+        Args: 
+            expected keyword for constructor method
+                A : system matrix, if not provide, raise assert error
+                B : input matrix, if not provide, B is None
+                C : output matrix, if not provide, C is None
+                D : input matrix, if not provide, D is None
+
+
+
         """
         
         assert "A" in kwargs, "matrix A must be provided"
@@ -85,10 +97,10 @@ class LTI():
 
     @property
     def dimension(self,) -> list:
-        """[summary]
+        """An attributes of system
 
         Returns:
-            list: [description]
+            list: got the length 3, dimention of 
         """
         return self.states_shape, self.inputs_shape, self.outputs_shape
     
@@ -96,11 +108,26 @@ class LTI():
 
 
     def eigvals(self):
+        """Compute the eigen values of system matrix (matrix A)
+
+        Returns:
+            [np.ndarray]: [1D array of eigvalues]
+        """
         return scipy.linalg.eigvals(self._A)
     
     def is_stable(self,algorimth='hurwitz', **kwagrs) -> int:
-        assert algorimth in LTI.bibo_algorithm, f"Invalid algorithm, must be  \
-                                                        in {LTI.bibo_algorithm}"
+        """[Compute the stability of system]
+
+        Args:
+            algorimth (str, optional): [select the algorithms to determine stability of system ]. Defaults to 'hurwitz'.
+
+        Returns:
+            int: 1 - if system is stable
+                 0 - if selected algorithms can't conclude about stability of system
+                -1 - if system is unstable   
+        """
+        assert algorimth in ["gerschgorin","lyapunov" ,"hurwitz"], f"Invalid algorithm, must be  \
+                                                        in ['gerschgorin','lyapunov' ,'hurwitz']"
         if algorimth=='gerschgorin': #Gerschgorin
             std = bibo.Gerschgorin(self._A)
             result = std.conclusion()
@@ -122,16 +149,16 @@ class LTI():
   
         
     def is_controlable(self,algorimth='kalman', **kwagrs) -> bool:
-        """[summary]
+        """Determine the controllability of system.
 
         Args:
-            algorimth (str, optional): [description]. Defaults to 'kalman'.
+            algorimth (str, optional): select the algorithms to determine controllability of system. Defaults to 'kalman'.
 
         Raises:
-            ValueError: [description]
+            ValueError: if the input matrix (matrix B) not found
 
         Returns:
-            bool: [description]
+            bool: True if system is controlalbe
         """
         if self._B is None:
             raise ValueError('please provide B matrix')
@@ -157,8 +184,21 @@ class LTI():
         else:
             return False 
 
-    def is_observable(self,) -> bool:
-        assert self._C is not None, 'please fill matrix C to calculate observability'
+    def is_observable(self,algorimth='kalman') -> bool:
+        """Determine the observability of system.
+
+        Args:
+            algorimth (str, optional): select the algorithms to determine observability of system. Defaults to 'kalman'.
+
+        Raises:
+            ValueError: if the output matrix (matrix C) not found
+
+        Returns:
+            bool: True is system is observable
+        """
+        #assert self._C is not None, 'please fill matrix C to calculate observability'
+        if self._C is None:
+            raise ValueError('please provide C matrix')
         A = self._A
         C = self._C 
         M = C 
@@ -182,7 +222,7 @@ class LTI():
 
     def setup_simulink(self, max_step=1e-3, algo='RK45', t_sim=(0,10), x0=None, sample_time = 1e-2):
         # fixed step_size
-        """Run this function before any simulations
+        """Run this function before any simulations. This method set the necessary params for running simulink.
 
         Args:
             max_step (float, optional): define max step for ODEs solver algorithms. Defaults to 1e-3.
@@ -212,6 +252,15 @@ class LTI():
         self.sample_time = sample_time
 
     def step_response(self,input_function=None,logs_file =None):
+        """[summary]
+
+        Args:
+            input_function ([type], optional): [description]. Defaults to None.
+            logs_file ([string], optional): [path to logs folder,]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
         sample_time = self.sample_time 
         time_start = self.t_sim[0]
         time_stop = self.t_sim[-1]      
@@ -248,71 +297,16 @@ class LTI():
             pass
 
         return x_out ,y_out# ndim, num_time_point
-    
-
-
-
-
-
         
-    def state_feed_back(self,pole,algorithms='Roppernecker', **kwargs):
-        """[summary]
-
-        Args:
-            pole ([type]): [description]
-            algorithms (str, optional): [description]. Defaults to 'Roppernecker'.
-
-        Raises:
-            ValueError: [description]
-
-        Returns:
-            [type]: [description]
-        """
-        controlability = self.is_controlable()
-        if not controlability:
-            print('system is not controlalbe')
-            return 
-        if self._B is None:
-            raise ValueError('matrix B must be provided')
-        eigvals,eigvectors = np.linalg.eig(self.A)
-
-       
-        a= []
-        t = []
-        for index,s in enumerate(pole):
-
-            if s in eigvals:
-                a.append(eigvectors[:,index].reshape(-1,1))
-                t_index = np.zeros((self.inputs_shape,1))
-                #t_index[index] = 1
-                t.append(t_index)
-                #print('yes:', eigvectors[:,index].reshape(-1,1))
-            else:
-                a.append( np.linalg.inv(s*np.eye(self.states_shape)- self.A)@self.B)
-                t_index = np.ones((self.inputs_shape,1))
-                t.append(t_index)
-                #print('yes:', eigvectors[:,index].reshape(-1,1))
-                
-        a = np.concatenate(a,axis=1)
-        t = np.concatenate(t,axis=1)
-        print(t)
-        print(a)
-        R = - t @ np.linalg.inv(a)
-        return R
-        
-
     def apply_state_feedback(self,R):
-        """[summary]
+        """ simulink the behavior of system with state feedback controller
 
         Args:
-            R ([type]): [description]
-            time_start (int, optional): [description]. Defaults to 0.
-            time_stop (int, optional): [description]. Defaults to 10.
-            sample_time (float, optional): [description]. Defaults to 0.1.
-            save_fig (str, optional): [description]. Defaults to 'apply_state_feedback'.
+            R (np.ndarray): [description]
 
         Returns:
-            [type]: [description]
+            list: state and output of system
+                
         """
         A_old = self._A 
         self._A = self._A - self._B@R
@@ -320,3 +314,8 @@ class LTI():
         self._A = A_old 
         return out
         
+    
+        
+
+
+

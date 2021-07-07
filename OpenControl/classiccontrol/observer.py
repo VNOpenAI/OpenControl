@@ -1,29 +1,13 @@
-import numpy as np 
-from abc import ABC,abstractmethod
-import math
-import scipy.linalg
-import random
+import numpy as np
+import scipy 
 from .utils import get_coefficient
-    
-class StateFeedBackController(ABC):
-    """Abstract class for controller based on state feedback 
-    """
-    @abstractmethod()
-    def compute(self):
-        """Return the matrix of controller
-        """
-        pass
 
+class Luenberger():
 
-class PoleStatement(StateFeedBackController):
-    """Design controller, move the eigvalues of system to desire
+    algorithms = ['Ropernecker','Arckerman']
 
-    Args:
-        StateFeedBackController ([type]): [description]
-    """
     def __init__(self,pole,system,algo):
-        """Inherit SateFeedBackController 
-
+        """[summary]
 
         Args:
             pole ([list]): [description]
@@ -36,38 +20,36 @@ class PoleStatement(StateFeedBackController):
         self.algo = algo  
         self.system = system
 
-    def Roppernecker(self,):
 
+    def Roppernecker(self):
         
-        if self.system._B is None:
-            raise ValueError('matrix B must be provided')
+        observerable = self.system.is_observerble()
+        if not observerable:
+            print('the system is unobserverable')
+            return
         eigvals,eigvectors = np.linalg.eig(self.system.A)
         eigvals = eigvals.tolist()
-       
         a= []
         t = []
         for index,s in enumerate(self.pole):
-
             if s in eigvals:
                 a.append(eigvectors[:,index].reshape(-1,1))
                 t_index = np.zeros((self.system.inputs_shape,1))
                 t.append(t_index)
-
             else:
-                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B)
+                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.C)
                 t_index = np.ones((self.system.inputs_shape,1))
-                t.append(t_index)
-                
+                t.append(t_index)            
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
         R = - t @ np.linalg.inv(a)
         return R
 
     def Arckerman(self,):
-        if self.system._B is None:
-            raise ValueError('please provide B matrix')
+        #@if self._B is None:
+        #    raise ValueError('please provide B matrix')
         A = self.system._A 
-        B = self.system._B
+        B = self.system.C
         M = B
         ndim = self.system._states_shape
         if ndim==1:
@@ -82,7 +64,6 @@ class PoleStatement(StateFeedBackController):
             M = np.hstack([M,X])   
         M = np.linalg.inv(M)
         s = M[-1].reshape(1,-1)
-        
         S = 0 
         coefficient = get_coefficient(self.pole).reshape(-1)
         coefficient = coefficient.tolist()
@@ -91,31 +72,3 @@ class PoleStatement(StateFeedBackController):
             coeffi = coefficient[i]          
             S += coeffi*(s@np.linalg.matrix_power(A,i))
         return S
-
-
-
-    def compute(self):
-        controlability = self.system.is_controlable()
-        if not controlability:
-            print('system is not controlable')
-            return None
-        if self.algo =='Arckerman':
-            return self.Arckerman()
-        else: 
-            return self.Roppernecker()
-
-class LQR(StateFeedBackController):
-
-    def __init__(self,system,E,F):
-        self.system = system
-        self.E = E 
-        self.F = F 
-    
-    def compute(self):
-        q = self.E 
-        a = self.system.A
-        b = self.system.B
-        r = self.F 
-        P = scipy.linalg.solve_continuous_are(a=a,b=b,q=q,r=r)
-        R = scipy.linalg.pinv(self.F)@(self.system.B.T)@P 
-        return R
