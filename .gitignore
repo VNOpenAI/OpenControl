@@ -6,3 +6,4 @@ OpenControl/classiccontrol/__pycache__
 logs
 OpenControl/visualize/__pycache__/
 __pycache__/
+test_case.py

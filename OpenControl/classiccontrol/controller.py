@@ -8,7 +8,7 @@ from .utils import get_coefficient
 class StateFeedBackController(ABC):
     """Abstract class for controller based on state feedback 
     """
-    @abstractmethod()
+    @abstractmethod
     def compute(self):
         """Return the matrix of controller
         """
@@ -21,23 +21,33 @@ class PoleStatement(StateFeedBackController):
     Args:
         StateFeedBackController ([type]): [description]
     """
-    def __init__(self,pole,system,algo):
+    def __init__(self,pole,system,algo='Arckerman'):
         """Inherit SateFeedBackController 
 
 
         Args:
             pole ([list]): [description]
             system ([OpenControl.classiccontrol.linearsystem.LTI]): [the object of Controller]
-            algo ([strings]): []
+            algo ([strings]): select algorithm to design controller. Defaults to 'Arckerman'.
         """
         assert algo in ['Ropernecker','Arckerman'], "algo must be in list of ['Ropernecker','Arckerman']"
         self.pole = pole
         self.pole.sort() 
-        self.algo = algo  
+        self.algo = algo
+        if self.system.inputs_shape != 1 and algo=='Arckerman':
+            print('The Arckerman method only design for 1D_input system. Automatically switch to Ropernecker method')
+            self.algo = 'Ropernecker'
         self.system = system
 
-    def Roppernecker(self,):
+    def _Roppernecker(self,):
+        """This function Implement Controller, Designed based on Ropernecker algorithms
 
+        Raises:
+            ValueError: if system has no matrix B
+
+        Returns:
+            [np.ndarray]: 2D array, matrix of controller. got the shape (input_shape,state_shape)
+        """
         
         if self.system._B is None:
             raise ValueError('matrix B must be provided')
@@ -63,7 +73,7 @@ class PoleStatement(StateFeedBackController):
         R = - t @ np.linalg.inv(a)
         return R
 
-    def Arckerman(self,):
+    def _Arckerman(self,):
         if self.system._B is None:
             raise ValueError('please provide B matrix')
         A = self.system._A 
@@ -100,9 +110,9 @@ class PoleStatement(StateFeedBackController):
             print('system is not controlable')
             return None
         if self.algo =='Arckerman':
-            return self.Arckerman()
+            return self._Arckerman()
         else: 
-            return self.Roppernecker()
+            return self._Roppernecker()
 
 class LQR(StateFeedBackController):
 

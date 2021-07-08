@@ -7,12 +7,15 @@ class Luenberger():
     algorithms = ['Ropernecker','Arckerman']
 
     def __init__(self,pole,system,algo):
-        """[summary]
+        """this class design the Luenberger Observer for LTI system
 
         Args:
-            pole ([list]): [description]
-            system ([OpenControl.classiccontrol.linearsystem.LTI]): [the object of Controller]
-            algo ([strings]): []
+            pole : list
+                Desire poles of observer
+            system : OpenControl.classiccontrol.linearsystem.LTI
+                The object of Controller
+            algo : string
+                
         """
         assert algo in ['Ropernecker','Arckerman'], "algo must be in list of ['Ropernecker','Arckerman']"
         self.pole = pole

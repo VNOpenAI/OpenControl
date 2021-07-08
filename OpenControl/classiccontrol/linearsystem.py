@@ -6,9 +6,10 @@ import scipy
 from . import bibo
 import matplotlib.pyplot as plt
 class LTI():
-    """[summary]
-
+    """main object
+        #dimension: ndim of state,input and output vector
     Raises:
+        assert: [description]
         ValueError: [description]
         ValueError: [description]
 
@@ -22,7 +23,8 @@ class LTI():
     }
 
     def __init__(self,**kwargs):
-        """constructor of LTI system
+        """constructor of LTI system. LTI has some follwing basic attributes:
+
         
         Args: 
             expected keyword for constructor method
@@ -30,7 +32,7 @@ class LTI():
                 B : input matrix, if not provide, B is None
                 C : output matrix, if not provide, C is None
                 D : input matrix, if not provide, D is None
-
+            
 
 
         """
@@ -252,14 +254,20 @@ class LTI():
         self.sample_time = sample_time
 
     def step_response(self,input_function=None,logs_file =None):
-        """[summary]
+        """simulink behavior of Opne-Loop system
+            Run self.setup_simulink() before running this this method
 
         Args:
-            input_function ([type], optional): [description]. Defaults to None.
+            input_function ([function], optional): 
+                address of input funtions, this funtion take a prams - t, and return
+                the values of input in time t. Defaults to None.
             logs_file ([string], optional): [path to logs folder,]. Defaults to None.
 
         Returns:
-            [type]: [description]
+            x_out: 2D-np.ndarray
+                state of system in time series ,between self.t_sim
+            y_out: 2D-np.ndarray
+                output of system in time series,
         """
         sample_time = self.sample_time 
         time_start = self.t_sim[0]
@@ -298,15 +306,18 @@ class LTI():
 
         return x_out ,y_out# ndim, num_time_point
         
-    def apply_state_feedback(self,R):
-        """ simulink the behavior of system with state feedback controller
+    def apply_state_feedback(self,R,input_function=None,logs_file =None):
+        """ simulink the behavior of close-loop system (feedback_system)
+            Run self.setup_simulink() before running this this method
 
         Args:
-            R (np.ndarray): [description]
-
+            R :(2D-np.ndarray)
+                state_feedback_matrix
+            input_function: function
         Returns:
-            list: state and output of system
-                
+            x_out: 2D-np.ndarray
+                state of cl
+            y_out: 2D-np.ndarray
         """
         A_old = self._A 
         self._A = self._A - self._B@R
