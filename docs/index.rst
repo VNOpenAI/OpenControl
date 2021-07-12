@@ -3,25 +3,25 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Python Approximate Dynamic Programming for Control System
+Python Library for Control System
 ===========================================================
 
-The Python Approximate Dynamic Programming for Control System (`python-adp`) is the python package 
-that implement basic algorithms for analysis and design of optimal feedback controllers.
+The OpenControl is a python package that implement basic algorithms for analysis and design of optimal feedback controllers.
 
 .. rubric:: Features:
 
-- Linear quadratic regulator (LQR) computation
-- Integral reinforcement learning algorithms for linear/nonlinear systems
-- Off-policy learning algorithms for linear/nonlinear systems
-- On-policy learning (Q-Learning) algorithms for linear/nonlinear systems
-- Experience replay algorithms for linear/nonlinear systems
+- Classical control methods
+- Linear quadratic regulator (``LQR``) computation
+- Robust Adaptive Dynamic Programming (``ADP``) for optimal linear/nonlinear control systems
+- Off-policy, On-policy learning algorithms for linear/nonlinear systems
+- Experience replay algorithms for linear/nonlinear systems (TODO)
   
 .. rubric:: Documentation
 .. toctree::
    :maxdepth: 2
    
    intro
+   classic
    system
    linCon
    nonLinCon
@@ -32,32 +32,37 @@ that implement basic algorithms for analysis and design of optimal feedback cont
 
 .. rubric:: Development
 
-The :class:`ADP_control.system.LTI` :func:`ADP_control.system.LTI.integrate`
-
 You can check out the latest version of the source code with the command::
 
-   git clone https://github.com/PhiDCH/ADP
+   git clone https://github.com/VNOpenAI/OpenControl
 
 You can run the unit tests with `python`_ to make sure that everything is
 working correctly.  Inside the source directory, run::
 
-   python linearSystem.py
+   python test.py
 
 .. _python: https://www.python.org
 
-Your contributions are welcome!  Simply fork the `GitHub repository <https://github.com/PhiDCH/ADP>`_ and send a
+Your contributions are welcome!  Simply fork the `GitHub repository <https://github.com/VNOpenAI/OpenControl>`_ and send a
 `pull request`_.
 
-.. _pull request: https://github.com/PhiDCH/ADP/pulls
+.. _pull request: https://github.com/VNOpenAI/OpenControl/pulls
 
 Please see the `Developer's Wiki`_ for detailed instructions.
 
-.. _Developer's Wiki: https://github.com/PhiDCH/ADP/wiki
+.. _`Developer's Wiki`: https://github.com/VNOpenAI/OpenControl/wiki
 
 .. rubric:: Links
 
-- Issue tracker: https://github.com/PhiDCH/ADP/issues
+- Issue tracker: https://github.com/VNOpenAI/OpenControl/issues
 
+
+Quick-start
+============================
+
+For quick tutorials and application, please review the `Colab Notebook`_
+
+.. _`Colab Notebook`: https://colab.research.google.com/drive/10mYMDliuOZD5i-YqmD9noOL8JDhC6t3x?usp=sharing
 
 Indices and tables
 ==================

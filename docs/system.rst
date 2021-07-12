@@ -15,7 +15,7 @@ Consider a continuous linear time invariant system described by:
 where :math:`x\in\mathbb{R}^n` is the state, :math:`u\in\mathbb{R}^m` is the control input, 
 :math:`A\in\mathbb{R}^{nn}` is the state matrix, :math:`B\in\mathbb{R}^{nm}` is the control matrix 
 
-To create a LTI system use :class:`ADP_control.system.LTI` 
+To create a LTI system use :class:`OpenControl.ADP_control.LTI` 
 
 .. code-block:: python
 
@@ -25,7 +25,7 @@ To create a LTI system use :class:`ADP_control.system.LTI`
     A = np.eye(3); B = np.ones((3,1))
     sys = LTI(A, B) # or sys = LTI(A, B, C, D) 
 
-then _`setup a simulation section`, use :func:`ADP_control.system.LTI.setSimulationParam`
+then _`setup a simulation section`, use :func:`OpenControl.ADP_control.LTI.setSimulationParam`
 
 .. code-block:: python
 
@@ -45,7 +45,7 @@ Consider a continuous-time affine nonlinear dynamical system described by:
 
 where :math:`x\in\mathbb{R}^n` is the state, :math:`u\in\mathbb{R}^m` is the control input, :math:`f:\mathbb{R}^n \to \mathbb{R}^n` and :math:`g:\mathbb{R}^n \to \mathbb{R}^{nm}` are locally Lipschitz mappings with :math:`f(0)=0`
 
-To create a nonlinear system use :class:`ADP_control.system.nonLin` 
+To create a nonlinear system use :class:`OpenControl.ADP_control.NonLin` 
 
 .. code-block:: python
 
@@ -59,26 +59,18 @@ then setup a simulation section, see `setup a simulation section`_
 
 
 
-.. autoclass:: ADP_control.system.LTI
+.. .. autoclass:: OpenControl.ADP_control.LTI
     :members:
     :undoc-members:
     :show-inheritance:
     :special-members: __init__
 
-.. autoclass:: ADP_control.system.nonLin
+.. .. autoclass:: OpenControl.ADP_control.NonLin
     :members:
     :undoc-members:
     :show-inheritance:
     :special-members: __init__
 
-Problem solving
-========================
 
-.. math:: 
-    e^{i\pi} + 1 = 0
-    :label: euler
-
-Euler's identity, equation :eq:`euler`, was elected one of the most
-beautiful mathematical formulas.
 
  

@@ -1,3 +1,2 @@
-from . import system
-from .controller import *
-from .visualize import *
+from .system import LTI,NonLin
+from .controller import LTIController, NonLinController

@@ -1,6 +1,6 @@
 import numpy as np  
 from scipy import integrate
-from .visualize import Logger
+from ..visualize import Logger 
 
 class LTI():
     """
@@ -86,7 +86,7 @@ class LTI():
 
         return result.t, result.y.T
     
-class nonLin():
+class NonLin():
     """This class represent non-linear system by ``ODEs``. 
     
     Attributes:
