@@ -44,7 +44,7 @@ where ``u0`` is the initial admissible control policy and :math:`e` is the ``exp
 
 where :math:`v_i = u_0-u_i+e`. 
 
-Take the time derivative of :math:`V_i(x)` along :eq:offPolSystem2 and integrate the result within interval :math:`[t,t+T]` to obtain:
+Take the time derivative of :math:`V_i(x)` along :eq:`offPolSystem2` and integrate the result within interval :math:`[t,t+T]` to obtain:
 
 .. math::
     V_i(x(t+T)) - V_i(x(t)) = - \int_t^{t+T} [q(x)+u_i^TRu_i + 2u_{i+1}^TRv_i]d\tau
