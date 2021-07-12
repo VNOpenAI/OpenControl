@@ -27,4 +27,4 @@ For quick tutorials and application, please review the [Colab Notebook](https://
 
 ## Documentation 
 
-Please check the lastest version of document at 'https:...'
+Please check the lastest version of [document](https://opencontrol.readthedocs.io/en/latest/intro.html)

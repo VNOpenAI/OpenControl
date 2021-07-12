@@ -18,7 +18,7 @@ With OpenControl you can design the control system through simulating:
     - Analysis On-policy Learning versus Off-policy Learning.
     - Customize the value function and time-interval for learning
     - Customize the basis function of neural network used for approximating actor/critic
-    - Reconstruct trending papers' result, explore new control algorithms
+    - Reproduce trending papers' result, explore new control algorithms
     - Visualize the simulation results by Tensorboard_
 
 .. _Tensorboard: https://www.tensorflow.org/tensorboard
