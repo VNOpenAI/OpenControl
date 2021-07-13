@@ -6,7 +6,7 @@ OpenControl/__pycache__
 docs/_build
 *.ipynb
 logs
-*/__pycache__
+__pycache__
 test_case.py
 testcasse_linearSystem.py
-*/_version.py
+OpenControl/_version.py
