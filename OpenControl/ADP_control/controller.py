@@ -476,11 +476,11 @@ class NonLinController():
             Iupsi.append(Iupsi_)
             Ipsipsi.append(Ipsipsi_)
 
-        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot, x_plot, 'states_unlearned')
+        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot.copy(), x_plot.copy(), 'states_unlearned')
         # solve policy 
         save_Wc, save_Wa = self._policyEval(np.array(dphi), np.array(Iq), np.array(Iupsi), np.array(Ipsipsi))
         Waopt = save_Wa[-1]
-        self.t_plot, self.x_plot = self._afterGainWopt(t_plot, x_plot, Waopt, 'states_offPolicy')
+        self.t_plot, self.x_plot = self._afterGainWopt(t_plot.copy(), x_plot.copy(), Waopt, 'states_offPolicy')
 
         return save_Wc[-1], save_Wa[-1]
         
