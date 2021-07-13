@@ -429,12 +429,13 @@ class NonLinController():
         result = integrate.solve_ivp(fun=dot_x, t_span=t_span, y0=x0, method=self.system.algo, max_step=self.system.max_step, dense_output=True)
         return result.t, result.y.T
       
-    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True, unlearned_compare=True):
+    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True, unlearned_compare=False):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
 
         Args:
             stop_thres (float, optional): threshold value to stop iteration. Defaults to 1e-3.
             viz (boolean): True for visualize results on ``Tensorboard``. Default to True
+            unlearned_compare (boolean): True to log unlearned states data, for comparision purpose.
             max_iter (int, optional): the maximum number of policy iterations. Defaults to 30.
 
         Returns:
