@@ -2,6 +2,11 @@
 Linear ADP Controller
 *************************
 
+The below algorithms is given in the book `Robust Adaptive Dynamic Programming`_.
+
+.. _`Robust Adaptive Dynamic Programming`: https://www.wiley.com/en-us/Robust+Adaptive+Dynamic+Programming-p-9781119132646
+
+
 Problem statements
 ================================================================
 

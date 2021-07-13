@@ -2,6 +2,10 @@
 Non-Linear ADP Controller
 *************************
 
+The below algorithms is given in the book `Robust Adaptive Dynamic Programming`_.
+
+.. _`Robust Adaptive Dynamic Programming`: https://www.wiley.com/en-us/Robust+Adaptive+Dynamic+Programming-p-9781119132646
+
 Problem statements
 ================================================================
 
@@ -95,6 +99,13 @@ Finally, one can realize that the :eq:`fixpoint3` is actually a fixpoint equatio
 .. math::
     A(w_i)C(w_{i+1}) = B(w_i)
 
+.. note::
+    - the initial controller ``u0`` must be ``admissible`` controller 
+    - the squences of basis functions :math:`\phi_j(x), \psi_j(x)` should be in the form of *linearly independent smooth*. Default basis functions is the ``polynomial functions``, see :func:`OpenControl.ADP_control.NonLinController.default_psi_func` and :func:`OpenControl.ADP_control.NonLinController.default_phi_func`
+    - the time interval ``T`` for data collection must be larger than the sample time
+    - ``number of data`` :math:`l >= n(n+1) + 2mn`
+    - the default function :math:`q(x)` is :math:`x^Tx`
+
 Algorithm
 ----------------
 
@@ -103,20 +114,28 @@ Algorithm
 Library Usage
 ----------------------
 
+Define a non-linear system like in :doc:`system`, then setup a simulation section by :func:`OpenControl.ADP_control.NonLinController.setPolicyParam` and perform simulation by :func:`OpenControl.ADP_control.NonLinController.offPolicy`
+
 .. code-block:: python
 
     from OpenControl.ADP_control import NonLinController
 
     ##########define a controller##################
     Ctrl = NonLinController(sys)
-    u0 = 0      # the system is already globally stable
+    u0 = lambda x: 0      # the system is already globally stable
     data_eval = 0.01; num_data = 80       # at leats n_phi+n_psi
     explore_noise = lambda t: 0.2*np.sum(np.sin(np.array([1, 3, 7, 11, 13, 15])*t)) 
 
     ###############setup policy parameter############
-    Ctrl.setPolicyParam(data_eval=data_eval, num_data=num_data, explore_noise=explore_noise)
+    Ctrl.setPolicyParam(data_eval=data_eval, num_data=num_data, explore_noise=explore_noise, u0=u0)
     ###############take simulation step##############
     Wc, Wa = Ctrl.offPolicy()
+
+then the optimal control policy is given by
+
+.. code-block:: python
+
+    uopt = lambda t,x: Wa.dot(Ctrl.psi_func(x))
 
 
 .. .. autoclass:: OpenControl.ADP_control.NonLinController

@@ -552,7 +552,7 @@ class NonLinController():
             x (1xn  array): the state vector
 
         Returns:
-            list func(x): see the **Controller Design / Problem statements**
+            list func(x): the polynomial basis function. If :math:`x=[x_1,x_2]^T` then :math:`\psi(x) = [x_1, x_2, x_1^3, x_1^2x_2, x_1x_2^2, x_2^3]^T`
         """
         psi = []
         for i in range(len(x)):
@@ -569,7 +569,7 @@ class NonLinController():
             x (1xn  array): the state vector
 
         Returns:
-            list func(x): see the **Controller Design / Problem statements**
+            list func(x): the polynomial basis function. If :math:`x=[x_1,x_2]^T` then :math:`\phi(x) = [x_1^2, x_1x_2, x_2^2, x_1^4, x_1^2x_2^2, x_2^4]^T`
         """
         phi = []
         for i in range(len(x)):
