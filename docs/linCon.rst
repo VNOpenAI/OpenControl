@@ -137,6 +137,6 @@ Setup a simulation section the same as the `section`_ then perform simulation by
 
 .. .. autoclass:: OpenControl.ADP_control.LTIController
     :members:
-    :undoc-members:
+    :un doc-members:
     :show-inheritance:
     :special-members: __init__
