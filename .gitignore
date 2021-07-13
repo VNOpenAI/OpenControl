@@ -9,3 +9,6 @@ logs
 __pycache__
 test_case.py
 testcasse_linearSystem.py
+dist
+OpenControl.egg-info
+.pypirc
