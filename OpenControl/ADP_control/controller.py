@@ -429,7 +429,7 @@ class NonLinController():
         result = integrate.solve_ivp(fun=dot_x, t_span=t_span, y0=x0, method=self.system.algo, max_step=self.system.max_step, dense_output=True)
         return result.t, result.y.T
       
-    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True):
+    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True, unlearned_compare=True):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
 
         Args:
@@ -476,12 +476,29 @@ class NonLinController():
             Iupsi.append(Iupsi_)
             Ipsipsi.append(Ipsipsi_)
 
+        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot, x_plot, 'states_unlearned')
         # solve policy 
         save_Wc, save_Wa = self._policyEval(np.array(dphi), np.array(Iq), np.array(Iupsi), np.array(Ipsipsi))
         Waopt = save_Wa[-1]
         self.t_plot, self.x_plot = self._afterGainWopt(t_plot, x_plot, Waopt, 'states_offPolicy')
 
         return save_Wc[-1], save_Wa[-1]
+        
+    def _unlearn_controller(self, t_plot, x_plot, section):
+        u = lambda t,x: self.u0(x)
+        dot_x = lambda t,x: self.dot_x(t,x,u(t,x))
+        sample_time = self.system.sample_time
+        start = t_plot[-1]
+        stop = self.system.t_sim[1]
+        N = int((stop - start)/sample_time)
+        for i in range(N):
+            t_temp, x_temp = self.step(dot_x, x_plot[-1], (t_plot[-1], t_plot[-1]+sample_time))
+            if self.viz:
+                self.logX.log(section, x_temp[-1], int(t_temp[-1]/self.system.sample_time))
+            t_plot.extend(t_temp[1:].tolist())
+            x_plot.extend(x_temp[1:].tolist())
+        
+        return t_plot, x_plot          
         
     def _afterGainWopt(self, t_plot, x_plot, Waopt, section):
         u = lambda t,x: Waopt.dot(self.psi_func(x))
