@@ -119,7 +119,7 @@ Library Usage
     Wc, Wa = Ctrl.offPolicy()
 
 
-.. autoclass:: OpenControl.ADP_control.NonLinController
+.. .. autoclass:: OpenControl.ADP_control.NonLinController
     :members:
     :undoc-members:
     :show-inheritance:
