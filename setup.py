@@ -16,7 +16,7 @@ setuptools.setup(
     description="A python control systems package",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/VNOpenAI/OpenControl",
+    url="https://opencontrol.readthedocs.io/en/latest/",
     project_urls={
         "Bug Tracker": "https://github.com/VNOpenAI/OpenControl/issues",
     },
