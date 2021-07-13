@@ -9,4 +9,3 @@ logs
 __pycache__
 test_case.py
 testcasse_linearSystem.py
-OpenControl/_version.py
