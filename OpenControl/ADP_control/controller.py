@@ -9,6 +9,7 @@ class LTIController():
     
         Attributes:
             system (LTI class): the object of LTI class
+            log_dir (string, optional): the folder include all log files. Defaults to 'results'.
             logX (Logger class): the object of Logger class, use for logging state signals
             K0 (mxn array, optional): The initial value of K matrix. Defaults to np.zeros((m,n)).
             Q (nxn array, optional): The Q matrix. Defaults to 1.
@@ -21,18 +22,20 @@ class LTIController():
             t_plot, x_plot (float, array): use for logging, plotting simulation result
             viz (boolean): True for visualize results on ``Tensorboard``. Default to True
     """
-    def __init__(self, system):
+    def __init__(self, system, log_dir='results'):
         """Design a controller for the system input.
 
         Args:
             system (LTI class): Call this class after system.setSimulationParams()
+            log_dir (string, optional): the folder include all log files. Defaults to 'results'.
         """
         self.system = system
         self.model = system.model
         self.A = self.model['A']
         self.B = self.model['B']
         self.dimension = self.model['dimension']
-        self.logX = Logger(log_dir='results')
+        self.log_dir = log_dir
+        self.logX = Logger(log_dir=log_dir)
         
     def step(self, x0, u, t_span):
         """Step respond of the system.
@@ -228,8 +231,8 @@ class LTIController():
         self.num_data = num_data
         self.explore_noise = explore_noise
         
-        self.logK = Logger('results')
-        self.logP = Logger('results')
+        self.logK = Logger(log_dir=self.log_dir)
+        self.logP = Logger(log_dir=self.log_dir)
             
     def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
@@ -346,6 +349,7 @@ class NonLinController():
     
         Attributes:
             system (nonLin class): the object of nonLin class
+            log_dir (string, optional): the folder include all log files. Defaults to 'results'.
             logX (Logger class): the object of Logger class, use for logging state signals
             u0 (func(x), optional): The initial feedback control policy. Defaults to 0.
             q_func (func(x), optional): the function :math:`q(x)`. Defaults to nonLinController.default_q_func.
@@ -359,15 +363,17 @@ class NonLinController():
             logWc (Logger class): logging to value of the weight of the critic
             t_plot, x_plot (float, array): use for logging, plotting simulation result      
     """
-    def __init__(self, system):
+    def __init__(self, system, log_dir='results'):
         """Design a controller for the system 
 
         Args:
             system (nonLin class): Call this class after system.setSimulationParams()
+            log_dir (string, optional): the folder include all log files. Defaults to 'results'.
         """
         self.system = system
         self.dot_x = self.system.dot_x
-        self.logX = Logger('results')
+        self.log_dir = log_dir
+        self.logX = Logger(log_dir=self.log_dir)
         
     def setPolicyParam(self, q_func=None, R=None, phi_func=None, psi_func=None, u0=lambda x: 0, data_eval=0.1, num_data=10, explore_noise=lambda t: 2*np.sin(100*t)):
         """Setup policy parameters for both the On (Off) policy algorithms. Initalize logger for K, P matrix
@@ -405,8 +411,8 @@ class NonLinController():
         self.num_data = num_data
         self.explore_noise = explore_noise   
         
-        self.logWa = Logger('results')   
-        self.logWc = Logger('results')
+        self.logWa = Logger(self.log_dir)   
+        self.logWc = Logger(self.log_dir)
     
     def step(self, dot_x, x0, t_span):
         """Step respond of the no-input system
