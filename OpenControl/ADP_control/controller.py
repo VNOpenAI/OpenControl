@@ -268,7 +268,7 @@ class LTIController():
             t_collect = t_plot[-1]
             while t_plot[-1] < t_collect + self.data_eval:
                 t_temp, x_temp = self.step(x0=x_plot[-1], u=u, t_span=(t_plot[-1], t_plot[-1] + self.system.sample_time))
-                if self.visulize:
+                if self.viz:
                     self.logX.log('states_offPolicy', x_temp[-1], int(t_temp[-1]/self.system.sample_time))
                 
                 x_sample.append(x_temp[-1])
@@ -361,7 +361,8 @@ class NonLinController():
             explore_noise (func(t), optional): The exploration noise within the learning stage. Defaults to lambda t:2*np.sin(100*t).
             logWa (Logger class): logging to value of the weight of the actor 
             logWc (Logger class): logging to value of the weight of the critic
-            t_plot, x_plot (float, array): use for logging, plotting simulation result      
+            t_plot, x_plot (float, array): use for logging, plotting simulation result 
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True     
     """
     def __init__(self, system, log_dir='results'):
         """Design a controller for the system 
@@ -428,18 +429,18 @@ class NonLinController():
         result = integrate.solve_ivp(fun=dot_x, t_span=t_span, y0=x0, method=self.system.algo, max_step=self.system.max_step, dense_output=True)
         return result.t, result.y.T
       
-    def offPolicy(self, stop_thres=1e-3, max_iter=30, visualize=True):
+    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
 
         Args:
             stop_thres (float, optional): threshold value to stop iteration. Defaults to 1e-3.
-            viz (bool, optional): True for logging data. Defaults to True.
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True
             max_iter (int, optional): the maximum number of policy iterations. Defaults to 30.
 
         Returns:
             array, array: the final updated weight of critic, actor neural nets.  
         """
-        self.visualize = visualize
+        self.viz = viz
         self.stop_thres = stop_thres
         self.max_iter = max_iter
         # collect data
@@ -460,7 +461,7 @@ class NonLinController():
             while t_plot[-1] < t_collect + self.data_eval:
                 t_span = (t_plot[-1], t_plot[-1] + self.system.sample_time)
                 t_temp, x_temp = self.step(dot_x, x_plot[-1], t_span)
-                if self.visualize:
+                if self.viz:
                     self.logX.log('states_offPolicy', x_temp[-1], int(t_temp[-1]/self.system.sample_time))
                     
                 t_sample.append(t_temp[-1])
@@ -491,7 +492,7 @@ class NonLinController():
         N = int((stop - start)/sample_time)
         for i in range(N):
             t_temp, x_temp = self.step(dot_x, x_plot[-1], (t_plot[-1], t_plot[-1]+sample_time))
-            if self.visualize:
+            if self.viz:
                 self.logX.log(section, x_temp[-1], int(t_temp[-1]/self.system.sample_time))
             t_plot.extend(t_temp[1:].tolist())
             x_plot.extend(x_temp[1:].tolist())
@@ -512,7 +513,7 @@ class NonLinController():
             B = Iq + Ipsipsi.dot(Wa.T.dot(self.R.dot(Wa)).flatten()) 
             Wca = np.linalg.pinv(A).dot(B)
             Wc = Wca[:n_phi]
-            if self.visualize:
+            if self.viz:
                 self.logWc.log('offPolicy_Wc', Wc, i)
                 self.logWa.log('offPolicy_Wa', Wa, i)
             try: 
