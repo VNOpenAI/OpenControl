@@ -3,6 +3,7 @@ torchvision==0.10.0
 torchaudio==0.9.0
 tensorboard
 scipy==1.6.3
+numpy
 control
 sphinx==4.0.2
 sphinx_rtd_theme==0.5.2
