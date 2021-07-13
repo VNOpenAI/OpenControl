@@ -479,7 +479,7 @@ class NonLinController():
         # solve policy 
         save_Wc, save_Wa = self._policyEval(np.array(dphi), np.array(Iq), np.array(Iupsi), np.array(Ipsipsi))
         Waopt = save_Wa[-1]
-        t_plot, x_plot = self._afterGainWopt(t_plot, x_plot, Waopt, 'states_offPolicy')
+        self.t_plot, self.x_plot = self._afterGainWopt(t_plot, x_plot, Waopt, 'states_offPolicy')
 
         return save_Wc[-1], save_Wa[-1]
         
@@ -588,3 +588,6 @@ class NonLinController():
             float: :math:`x^Tx`
         """
         return np.sum(x*x, axis=0)
+    
+
+
