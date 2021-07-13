@@ -135,7 +135,7 @@ Setup a simulation section the same as the `section`_ then perform simulation by
 
     K, P = Ctrl.offPolicy()
 
-.. autoclass:: OpenControl.ADP_control.LTIController
+.. .. autoclass:: OpenControl.ADP_control.LTIController
     :members:
     :undoc-members:
     :show-inheritance:
