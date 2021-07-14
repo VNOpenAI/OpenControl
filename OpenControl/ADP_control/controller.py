@@ -428,8 +428,25 @@ class NonLinController():
         """
         result = integrate.solve_ivp(fun=dot_x, t_span=t_span, y0=x0, method=self.system.algo, max_step=self.system.max_step, dense_output=True)
         return result.t, result.y.T
-      
-    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True, unlearned_compare=False):
+    
+    def feedback(self, viz=True):
+        """Check stability of the initial control policy u0
+        
+        Args:
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True
+            
+        Returns:
+            list, 2D array: t_plot and x_plot
+        """
+        self.viz = viz
+        x_plot = [self.system.x0]
+        t_plot = [self.system.t_sim[0]]       
+        
+        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot.copy(), x_plot.copy(), 'states_unlearned')
+        return 
+               
+              
+    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
 
         Args:
@@ -477,7 +494,6 @@ class NonLinController():
             Iupsi.append(Iupsi_)
             Ipsipsi.append(Ipsipsi_)
 
-        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot.copy(), x_plot.copy(), 'states_unlearned')
         # solve policy 
         save_Wc, save_Wa = self._policyEval(np.array(dphi), np.array(Iq), np.array(Iupsi), np.array(Ipsipsi))
         Waopt = save_Wa[-1]
@@ -499,7 +515,7 @@ class NonLinController():
             t_plot.extend(t_temp[1:].tolist())
             x_plot.extend(x_temp[1:].tolist())
         
-        return t_plot, x_plot          
+        return np.array(t_plot), np.array(x_plot)          
         
     def _afterGainWopt(self, t_plot, x_plot, Waopt, section):
         u = lambda t,x: Waopt.dot(self.psi_func(x))
@@ -515,7 +531,7 @@ class NonLinController():
             t_plot.extend(t_temp[1:].tolist())
             x_plot.extend(x_temp[1:].tolist())
         
-        return t_plot, x_plot
+        return np.array(t_plot), np.array(x_plot)
             
     def _policyEval(self, dphi, Iq, Iupsi, Ipsipsi):
         n_psi = len(self.psi_func(self.system.x0))
@@ -530,7 +546,7 @@ class NonLinController():
             A = np.hstack((dphi, temp))
             B = Iq + Ipsipsi.dot(Wa.T.dot(self.R.dot(Wa)).flatten()) 
             Wca = np.linalg.pinv(A).dot(B)
-            Wc = Wca[:n_phi]
+            Wc = -Wca[:n_phi]       # because u = Wa*psi not = -Wa*psi
             if self.viz:
                 self.logWc.log('offPolicy_Wc', Wc, i)
                 self.logWa.log('offPolicy_Wa', Wa, i)
