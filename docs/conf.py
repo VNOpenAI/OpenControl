@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.abspath('..'))
 
 project = 'OpenControl'
 copyright = '2021, VNOpenAI'
-author = 'PhiDCH'
+author = 'VNOpenAI'
 
 
 # -- General configuration ---------------------------------------------------
