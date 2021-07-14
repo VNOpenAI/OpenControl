@@ -13,3 +13,4 @@ dist
 OpenControl.egg-info
 .pypirc
 results
+examples/results
