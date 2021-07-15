@@ -22,6 +22,10 @@ You can check out the latest version of the source code with the command
 
 ## Installation
 
+Before all, create a new virtual conda environment and install requirements 
+
+    pip install requirements.txt
+
 You can do minimal installation of OpenControl with
 
     pip install OpenControl
