@@ -42,6 +42,8 @@ class LTI():
         B = kwargs.get('B')
         C = kwargs.get('C')
         D = kwargs.get('D')  
+        self.Nx = kwargs.get('Nx')
+        self.Nx = kwargs.get('Ny')
         for i in ['A','B','C','D']:   
             if kwargs.get(i) is not None:
                 assert isinstance(kwargs.get(i),np.ndarray), f"Invalid data type of {i}"
@@ -222,7 +224,7 @@ class LTI():
             return False
 
 
-    def setup_simulink(self, max_step=1e-3, algo='RK45', t_sim=(0,10), x0=None, sample_time = 1e-2):
+    def setup_simulink(self, max_step=1e-3, algo='RK45', t_sim=(0,10), x0=None, sample_time = 1e-2,z0=None):
         # fixed step_size
         """Run this function before any simulations. This method set the necessary params for running simulink.
 
@@ -246,13 +248,16 @@ class LTI():
         self.algo = algo
         self.t_sim = t_sim
         if np.all(x0==None):
-            self.x0 = np.ones((self.dimension[0],1))
+            self._x0 = np.ones((self.dimension[0],1))
         else: 
             self._x0 = x0
         assert type(x0) is np.ndarray, "x0 must be np.ndarray"
         assert x0.shape==(self.dimension[0],1), "invalid shape of"
         self.sample_time = sample_time
-
+        if z0 is None:
+            self._z0 = np.zeros_like(self._x0)
+        else: 
+            self._z0 = z0
     def step_response(self,input_function=None,logs_file =None):
         """simulink behavior of Opne-Loop system
             Run self.setup_simulink() before running this this method
@@ -279,28 +284,33 @@ class LTI():
         def function_x (t,x):
             out = self._A @ x.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1))
             return out.ravel()
-        def function_out(t,x):      
-            return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
-
+        def function_out(t,x):     
+            if self._D is not None: 
+                return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
+            else: 
+                return self._C @ x.reshape(-1,1)
         i_old = time_start 
         time_array = np.linspace(time_start+sample_time,time_stop,int((time_stop-time_start)//sample_time))
         
         x_out = []
+        y_out = []
         for i in time_array:
             #print(x0.shape)
             result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),max_step=self.max_step,method=self.algo)
             x0 = result.y.T[-1]  #x0 shape (n,)
             i_old = i
             x_out.append(x0) 
-            
-        if self._C is not None:
-            y_out = [function_out(i,x) for x in x_out]
-            y_out = np.array(y_out)
-        else: 
-            y_out = None
+            if self._C is not None:
+                y = function_out(i,x0).reshape(-1)
+                y_out.append(y)
+            else: 
+                y_out = None
+
 
         x_out = np.array(x_out)
+        y_out = np.array(y_out)
         x_out = x_out.T
+        y_out = y_out.T
         if logs_file is not None:
             pass
 
@@ -325,7 +335,57 @@ class LTI():
         self._A = A_old 
         return out
         
-    
+    def apply_observer(self,L,input_function=None,logs_file =None):
+        sample_time = self.sample_time 
+        time_start = self.t_sim[0]
+        time_stop = self.t_sim[-1]      
+
+        if input_function is None:
+            input_function = lambda t: np.zeros((self._inputs_shape,1))
+        x0 = self._x0
+        z0 = self._z0
+        def function_x (t,x):
+            out = self._A @ x.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1))
+            return out.ravel()
+        def function_out(t,x):     
+            if self._D is not None: 
+                return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
+            else: 
+                return self._C @ x.reshape(-1,1)
+        def function_z(t,z,x,y):
+            if self._D is not None:
+                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y-self._C@z.reshape(-1,1)-self._D@(input_function(t).reshape(-1,1)))
+            else:
+                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y-self._C@z.reshape(-1,1))
+            return out.ravel()
+        i_old = time_start 
+        time_array = np.linspace(time_start+sample_time,time_stop,int((time_stop-time_start)//sample_time))
+        
+        x_out = []
+        y_out = []
+        for i in time_array:
+            #print(x0.shape)
+            result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),max_step=self.max_step,method=self.algo)
+            x0 = result.y.T[-1]  #x0 shape (n,)
+            i_old = i
+            x_out.append(x0) 
+            if self._C is not None:
+                y = function_out(i,x0).reshape(-1)
+                y_out.append(y)
+            else: 
+                y_out = None
+            result_z = scipy.integrate.solve_ivp(function_z, t_span=(i_old,i), y0 = z0.reshape(-1),
+                        max_step=self.max_step,method=self.algo, args = (x0,y))
+            z0 = result_z.y.T[-1]
+            print(f'z0={z0}')
+        
+        x_out = np.array(x_out)
+        x_out = x_out.T
+        y_out = y_out.T
+        if logs_file is not None:
+            pass
+
+        return x_out ,y_out# ndim, num_time_point
         
 
 

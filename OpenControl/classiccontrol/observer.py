@@ -22,11 +22,13 @@ class Luenberger():
         self.pole.sort() 
         self.algo = algo  
         self.system = system
+        if self.system._C.shape[1] != 1 and algo=='Arckerman':
+            print('The Arckerman method only design for 1D_input system. Automatically switch to Ropernecker method')
+            self.algo = 'Ropernecker'
 
-
-    def Roppernecker(self):
+    def _Roppernecker(self):
         
-        observerable = self.system.is_observerble()
+        observerable = self.system.is_observable()
         if not observerable:
             print('the system is unobserverable')
             return
@@ -37,18 +39,20 @@ class Luenberger():
         for index,s in enumerate(self.pole):
             if s in eigvals:
                 a.append(eigvectors[:,index].reshape(-1,1))
-                t_index = np.zeros((self.system.inputs_shape,1))
+                t_index = np.zeros((self.system._states_shape,1))
                 t.append(t_index)
             else:
-                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.C)
-                t_index = np.ones((self.system.inputs_shape,1))
-                t.append(t_index)            
+                t_index = np.random.random((self.system._states_shape,1))
+                t.append(t_index)    
+                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.C@t_index)  
+
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
+
         R = - t @ np.linalg.inv(a)
         return R
 
-    def Arckerman(self,):
+    def _Arckerman(self,):
         #@if self._B is None:
         #    raise ValueError('please provide B matrix')
         A = self.system._A 
@@ -75,3 +79,14 @@ class Luenberger():
             coeffi = coefficient[i]          
             S += coeffi*(s@np.linalg.matrix_power(A,i))
         return S
+
+    def compute(self):
+        observability = self.system.is_observable()
+        if not observability:
+            print('system is not observable')
+            return None
+        if self.algo =='Arckerman':
+            return self._Arckerman()
+        else: 
+            return self._Roppernecker()
+

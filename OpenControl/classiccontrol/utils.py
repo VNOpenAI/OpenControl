@@ -1,5 +1,7 @@
 import numpy as np
 import random
+import math 
+import scipy.linalg
 def is_definite_positive_matrix(M):
     """Determine a maxtrix if 
 

@@ -4,7 +4,7 @@ import math
 import scipy.linalg
 import random
 from .utils import get_coefficient
-    
+import math
 class StateFeedBackController(ABC):
     """Abstract class for controller based on state feedback 
     """
@@ -34,10 +34,11 @@ class PoleStatement(StateFeedBackController):
         self.pole = pole
         self.pole.sort() 
         self.algo = algo
+        self.system = system
         if self.system.inputs_shape != 1 and algo=='Arckerman':
             print('The Arckerman method only design for 1D_input system. Automatically switch to Ropernecker method')
             self.algo = 'Ropernecker'
-        self.system = system
+        #self.system = system
 
     def _Roppernecker(self,):
         """This function Implement Controller, Designed based on Ropernecker algorithms
@@ -64,9 +65,10 @@ class PoleStatement(StateFeedBackController):
                 t.append(t_index)
 
             else:
-                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B)
                 t_index = np.ones((self.system.inputs_shape,1))
                 t.append(t_index)
+                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B)
+                t_index = np.ones((self.system.inputs_shape,1))
                 
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
@@ -102,6 +104,29 @@ class PoleStatement(StateFeedBackController):
             S += coeffi*(s@np.linalg.matrix_power(A,i))
         return S
 
+    def _Modal(self):
+        if self.system._B is None:
+            raise ValueError('please provide B matrix')
+        A = self.system._A 
+        B = self.system._B
+        n,r,_ = self.system.dimension[1]
+        number_casade = math.ceil(n/r)
+        ld,v = scipy.linalg.eig(A)
+        G = np.diag(ld)
+        b = []
+        v_inv = scipy.linalg.inv(v)
+        Mr_inv = v_inv[:r,:]
+        for i in range(r):
+            b.append(v_inv[i].reshape(1,-1 )@B)
+        Tr = np.concat(b,axis=0)
+        Tr_inv = scipy.linalg.inv(Tr)
+
+        Gr = np.diag(ld.reshape(-1)[0:r])
+        Sr = np.diag(self.pole[0:r])
+        R = -Tr@(Sr-Gr)@Tr       
+        return R
+
+
 
 
     def compute(self):
@@ -129,3 +154,4 @@ class LQR(StateFeedBackController):
         P = scipy.linalg.solve_continuous_are(a=a,b=b,q=q,r=r)
         R = scipy.linalg.pinv(self.F)@(self.system.B.T)@P 
         return R
+
