@@ -65,11 +65,10 @@ class PoleStatement(StateFeedBackController):
                 t.append(t_index)
 
             else:
-                t_index = np.ones((self.system.inputs_shape,1))
+                t_index = np.random.random((self.system.inputs_shape,1))
                 t.append(t_index)
-                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B)
-                t_index = np.ones((self.system.inputs_shape,1))
-                
+                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.B@t_index)
+
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
         R = - t @ np.linalg.inv(a)
