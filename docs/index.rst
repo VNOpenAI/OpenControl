@@ -36,17 +36,18 @@ You can check out the latest version of the source code with the command::
 
    git clone https://github.com/VNOpenAI/OpenControl
 
-You can run the unit tests with `python`_ to make sure that everything is
-working correctly.  Inside the source directory, run::
+.. rubric:: Installation
+   
+Before install OpenControl, ensure that all the dependent packages in the `requirements`_ is instelled. Then
 
-   python test.py
-
-.. _python: https://www.python.org
+   pip install OpenControl
+   
+.. _`requirements`: https://github.com/VNOpenAI/OpenControl/blob/master/requirements.txt
 
 Your contributions are welcome!  Simply fork the `GitHub repository <https://github.com/VNOpenAI/OpenControl>`_ and send a
 `pull request`_.
 
-.. _pull request: https://github.com/VNOpenAI/OpenControl/pulls
+.. _`pull request`: https://github.com/VNOpenAI/OpenControl/pulls
 
 Please see the `Developer's Wiki`_ for detailed instructions.
 

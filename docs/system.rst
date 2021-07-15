@@ -53,7 +53,7 @@ To create a nonlinear system use :class:`OpenControl.ADP_control.NonLin`
 
     dot_x = lambda t,x,u: 3x + np.array([0 0 1]).dot(u)
     dimension = (3,1)
-    sys = nonLin(dot_x, dimension)
+    sys = NonLin(dot_x, dimension)
 
 then setup a simulation section, see `setup a simulation section`_
 
