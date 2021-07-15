@@ -268,7 +268,7 @@ class LTIController():
             t_collect = t_plot[-1]
             while t_plot[-1] < t_collect + self.data_eval:
                 t_temp, x_temp = self.step(x0=x_plot[-1], u=u, t_span=(t_plot[-1], t_plot[-1] + self.system.sample_time))
-                if self.visulize:
+                if self.viz:
                     self.logX.log('states_offPolicy', x_temp[-1], int(t_temp[-1]/self.system.sample_time))
                 
                 x_sample.append(x_temp[-1])
@@ -361,7 +361,8 @@ class NonLinController():
             explore_noise (func(t), optional): The exploration noise within the learning stage. Defaults to lambda t:2*np.sin(100*t).
             logWa (Logger class): logging to value of the weight of the actor 
             logWc (Logger class): logging to value of the weight of the critic
-            t_plot, x_plot (float, array): use for logging, plotting simulation result      
+            t_plot, x_plot (float, array): use for logging, plotting simulation result 
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True     
     """
     def __init__(self, system, log_dir='results'):
         """Design a controller for the system 
@@ -427,19 +428,37 @@ class NonLinController():
         """
         result = integrate.solve_ivp(fun=dot_x, t_span=t_span, y0=x0, method=self.system.algo, max_step=self.system.max_step, dense_output=True)
         return result.t, result.y.T
-      
-    def offPolicy(self, stop_thres=1e-3, max_iter=30, visualize=True):
+    
+    def feedback(self, viz=True):
+        """Check stability of the initial control policy u0
+        
+        Args:
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True
+            
+        Returns:
+            list, 2D array: t_plot and x_plot
+        """
+        self.viz = viz
+        x_plot = [self.system.x0]
+        t_plot = [self.system.t_sim[0]]       
+        
+        self.t_plot_unlearn, self.x_plot_unlearn = self._unlearn_controller(t_plot.copy(), x_plot.copy(), 'states_unlearned')
+        return 
+               
+              
+    def offPolicy(self, stop_thres=1e-3, max_iter=30, viz=True):
         """Using Off-policy approach to find optimal adaptive feedback controller, requires only the dimension of the system 
 
         Args:
             stop_thres (float, optional): threshold value to stop iteration. Defaults to 1e-3.
-            viz (bool, optional): True for logging data. Defaults to True.
+            viz (boolean): True for visualize results on ``Tensorboard``. Default to True
+            unlearned_compare (boolean): True to log unlearned states data, for comparision purpose.
             max_iter (int, optional): the maximum number of policy iterations. Defaults to 30.
 
         Returns:
             array, array: the final updated weight of critic, actor neural nets.  
         """
-        self.visualize = visualize
+        self.viz = viz
         self.stop_thres = stop_thres
         self.max_iter = max_iter
         # collect data
@@ -460,7 +479,7 @@ class NonLinController():
             while t_plot[-1] < t_collect + self.data_eval:
                 t_span = (t_plot[-1], t_plot[-1] + self.system.sample_time)
                 t_temp, x_temp = self.step(dot_x, x_plot[-1], t_span)
-                if self.visualize:
+                if self.viz:
                     self.logX.log('states_offPolicy', x_temp[-1], int(t_temp[-1]/self.system.sample_time))
                     
                 t_sample.append(t_temp[-1])
@@ -478,9 +497,25 @@ class NonLinController():
         # solve policy 
         save_Wc, save_Wa = self._policyEval(np.array(dphi), np.array(Iq), np.array(Iupsi), np.array(Ipsipsi))
         Waopt = save_Wa[-1]
-        t_plot, x_plot = self._afterGainWopt(t_plot, x_plot, Waopt, 'states_offPolicy')
+        self.t_plot, self.x_plot = self._afterGainWopt(t_plot.copy(), x_plot.copy(), Waopt, 'states_offPolicy')
 
         return save_Wc[-1], save_Wa[-1]
+        
+    def _unlearn_controller(self, t_plot, x_plot, section):
+        u = lambda t,x: self.u0(x)
+        dot_x = lambda t,x: self.dot_x(t,x,u(t,x))
+        sample_time = self.system.sample_time
+        start = t_plot[-1]
+        stop = self.system.t_sim[1]
+        N = int((stop - start)/sample_time)
+        for i in range(N):
+            t_temp, x_temp = self.step(dot_x, x_plot[-1], (t_plot[-1], t_plot[-1]+sample_time))
+            if self.viz:
+                self.logX.log(section, x_temp[-1], int(t_temp[-1]/self.system.sample_time))
+            t_plot.extend(t_temp[1:].tolist())
+            x_plot.extend(x_temp[1:].tolist())
+        
+        return np.array(t_plot), np.array(x_plot)          
         
     def _afterGainWopt(self, t_plot, x_plot, Waopt, section):
         u = lambda t,x: Waopt.dot(self.psi_func(x))
@@ -491,12 +526,12 @@ class NonLinController():
         N = int((stop - start)/sample_time)
         for i in range(N):
             t_temp, x_temp = self.step(dot_x, x_plot[-1], (t_plot[-1], t_plot[-1]+sample_time))
-            if self.visualize:
+            if self.viz:
                 self.logX.log(section, x_temp[-1], int(t_temp[-1]/self.system.sample_time))
             t_plot.extend(t_temp[1:].tolist())
             x_plot.extend(x_temp[1:].tolist())
         
-        return t_plot, x_plot
+        return np.array(t_plot), np.array(x_plot)
             
     def _policyEval(self, dphi, Iq, Iupsi, Ipsipsi):
         n_psi = len(self.psi_func(self.system.x0))
@@ -511,8 +546,8 @@ class NonLinController():
             A = np.hstack((dphi, temp))
             B = Iq + Ipsipsi.dot(Wa.T.dot(self.R.dot(Wa)).flatten()) 
             Wca = np.linalg.pinv(A).dot(B)
-            Wc = Wca[:n_phi]
-            if self.visualize:
+            Wc = -Wca[:n_phi]       # because u = Wa*psi not = -Wa*psi
+            if self.viz:
                 self.logWc.log('offPolicy_Wc', Wc, i)
                 self.logWa.log('offPolicy_Wa', Wa, i)
             try: 
@@ -551,7 +586,7 @@ class NonLinController():
             x (1xn  array): the state vector
 
         Returns:
-            list func(x): see the **Controller Design / Problem statements**
+            list func(x): the polynomial basis function. If :math:`x=[x_1,x_2]^T` then :math:`\psi(x) = [x_1, x_2, x_1^3, x_1^2x_2, x_1x_2^2, x_2^3]^T`
         """
         psi = []
         for i in range(len(x)):
@@ -568,7 +603,7 @@ class NonLinController():
             x (1xn  array): the state vector
 
         Returns:
-            list func(x): see the **Controller Design / Problem statements**
+            list func(x): the polynomial basis function. If :math:`x=[x_1,x_2]^T` then :math:`\phi(x) = [x_1^2, x_1x_2, x_2^2, x_1^4, x_1^2x_2^2, x_2^4]^T`
         """
         phi = []
         for i in range(len(x)):
@@ -587,3 +622,6 @@ class NonLinController():
             float: :math:`x^Tx`
         """
         return np.sum(x*x, axis=0)
+    
+
+
