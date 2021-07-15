@@ -1,5 +1,7 @@
 # Python Library for Control System
 
+<img src="https://vnopenai.org/images/robotics.svg">
+
 The OpenControl is a python package that implement basic algorithms for analysis and design of optimal feedback controllers.
 
 ### Features:
