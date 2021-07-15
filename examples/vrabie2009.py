@@ -1,4 +1,4 @@
-### This examples the simulation examples in the paper of Vrabie and F.Lewis, the very first paper in in the ADP control area using neural networks. But in this python implementation, we dont use the algorithm in the paper because the original one requires knowledge the system dynamics. Instead, we simulate with OpenControl, Off Policy ADP Controller. The results that is the same as the paper's results demonstrate our python packages.
+### This examples the simulation examples in the paper of Vrabie and F.Lewis, the very first paper in the ADP control area using neural networks. But in this python implementation, we dont use the algorithm in the paper because the original one requires knowledge the system dynamics. Instead, we simulate with OpenControl, Off Policy ADP Controller. The results that is the same as the paper's results demonstrate our python packages.
 
 ### you can check the pape at https://www.sciencedirect.com/science/article/abs/pii/S0893608009000446
 
