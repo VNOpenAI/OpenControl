@@ -6,7 +6,7 @@ import random
 from .utils import get_coefficient
 import math
 class StateFeedBackController(ABC):
-    """Abstract class for controller based on state feedback 
+    """Abstract class for controller based on state feedback .asdkjasd
     """
     @abstractmethod
     def compute(self):
@@ -16,10 +16,8 @@ class StateFeedBackController(ABC):
 
 
 class PoleStatement(StateFeedBackController):
-    """Design controller, move the eigvalues of system to desire
-
-    Args:
-        StateFeedBackController ([type]): [description]
+    """Design controller, move the eigvalues of system to desire.
+    this class implement 3 method. Roppernecker, Arckerman, Modal
     """
     def __init__(self,pole,system,algo='Arckerman'):
         """Inherit SateFeedBackController 
@@ -54,7 +52,7 @@ class PoleStatement(StateFeedBackController):
             raise ValueError('matrix B must be provided')
         eigvals,eigvectors = np.linalg.eig(self.system.A)
         eigvals = eigvals.tolist()
-       
+        
         a= []
         t = []
         for index,s in enumerate(self.pole):
@@ -75,6 +73,14 @@ class PoleStatement(StateFeedBackController):
         return R
 
     def _Arckerman(self,):
+        """Implement the arckerman method.
+
+        Raises:
+            ValueError: if B is None or system declared without input matrix (B)
+
+        Returns:
+            [nd.array]: the controller matrix. Result of algorithms. see _Roppernecker funtion for mor detail.
+        """
         if self.system._B is None:
             raise ValueError('please provide B matrix')
         A = self.system._A 
@@ -129,6 +135,12 @@ class PoleStatement(StateFeedBackController):
 
 
     def compute(self):
+        """the system instance call this method to get the controller matrix, 
+            designed based on selected algorithms.
+
+        Returns:
+            [np.ndarray]: [description]
+        """
         controlability = self.system.is_controlable()
         if not controlability:
             print('system is not controlable')
@@ -139,8 +151,16 @@ class PoleStatement(StateFeedBackController):
             return self._Roppernecker()
 
 class LQR(StateFeedBackController):
-
+    """this class implement Optimal control ,LQR
+    """
     def __init__(self,system,E,F):
+        """setup params of LQR controller
+
+        Args:
+            system ([linearsystem.LTI]): LTI instance. the object of controller
+            E ([np.ndarray]): 
+            F ([np.ndarray]): 
+        """
         self.system = system
         self.E = E 
         self.F = F 

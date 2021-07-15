@@ -5,10 +5,18 @@ from scipy import linalg
 import scipy.linalg
 
 class BIBO(ABC):
-
+    """Abtract class for implement the algorithms. Which dertermine
+        the stability of system
+    """
     @abstractmethod
-    def conclusion(self):
-
+    def conclusion(self) -> int:
+        """conclude about the stability of system.
+            This function implement the algorithms.
+        Returns:
+            [int]: if 1, system is stable
+                   if 0, this algorithms unable to conclude about stability os system
+                   if -1, system is unstable
+        """
         pass
 
 
@@ -17,7 +25,12 @@ class Gerschgorin(BIBO):
     def __init__(self,A: np.ndarray):
         self.A = A 
     def conclusion(self)-> int: 
-        """[summary]
+        """conclude about the stability of system.
+            This function implement the algorithms.
+        Returns:
+            [int]: if 1, system is stable
+                   if 0, this algorithms unable to conclude about stability os system
+                   if -1, system is unstable
         """
         A = self.A
         diag = np.diag(A)
@@ -36,9 +49,13 @@ class Lyapunov(BIBO):
         """[summary]
 
         Args:
-            A ([type]): [description]
-            P ([type], optional): [description]. Defaults to None.
-            Q ([type], optional): [description]. Defaults to None.
+            A : nxn 2D-np.ndarray
+                system matrix
+            P : 2D-array
+                an define-positive matrix, needed matrix solve Ricati equations. If solution is define positive matrix,
+                system is stable. if P is provide, Q must be None. Defaults to None.
+            Q : 2D-array
+                the same as description of arg P,if Q is provide, P must be None. Defaults to None.   
         """
         self.A = A
         shape = A.shape
@@ -51,23 +68,25 @@ class Lyapunov(BIBO):
             assert Q.shape == A.shape, "Invalid shape of matrix Q"
     @staticmethod
     def is_definite_positive_matrix(M):
-        """[summary]
+        """Determine a maxtrix if 
 
         Args:
-            M ([type]): [description]
+            M : 2D-ndarray
 
         Returns:
-            [type]: [description]
+            [Boolean]: True if matrix is definite positive
         """
         condition1 = np.all(np.linalg.eigvals(M) > 0)
         condition2 = np.allclose(M,M.T)
         return  condition1 and condition2
 
     def conclusion(self):
-        """[summary]
-
+        """conclude about the stability of system.
+            This function implement the algorithms.
         Returns:
-            [type]: [description]
+            [int]: if 1, system is stable
+                   if 0, this algorithms unable to conclude about stability os system
+                   if -1, system is unstable
         """
         if self.P is not None:
             Q = -(self.P @ self.A + self.A.T @ self. P)
@@ -84,15 +103,17 @@ class Lyapunov(BIBO):
             return 0
 
 class Hurwitz(BIBO):
-    """[summary]
-
-    Args:
-        BIBO ([type]): [description]
-    """
     def __init__(self,A):
         self.A = A
 
     def conclusion(self,):
+        """conclude about the stability of system.
+            This function implement the algorithms.
+        Returns:
+            [int]: if 1, system is stable
+                   if 0, this algorithms unable to conclude about stability os system
+                   if -1, system is unstable
+        """
         result =  np.all(scipy.linalg.eigvals(self.A).real <0)
         if result:
             return 1 

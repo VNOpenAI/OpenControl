@@ -6,7 +6,7 @@ class Luenberger():
 
     algorithms = ['Ropernecker','Arckerman']
 
-    def __init__(self,pole,system,algo):
+    def __init__(self,pole,system,algo='Arckerman'):
         """this class design the Luenberger Observer for LTI system
 
         Args:
@@ -39,17 +39,18 @@ class Luenberger():
         for index,s in enumerate(self.pole):
             if s in eigvals:
                 a.append(eigvectors[:,index].reshape(-1,1))
-                t_index = np.zeros((self.system._states_shape,1))
+                t_index = np.zeros((self.system._outputs_shape,1))
                 t.append(t_index)
             else:
-                t_index = np.random.random((self.system._states_shape,1))
+                t_index = np.random.random((self.system._outputs_shape,1))
                 t.append(t_index)    
-                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A)@self.system.C@t_index)  
+                a.append( np.linalg.inv(s*np.eye(self.system.states_shape)- self.system.A.T)@self.system.C.T@t_index)  
 
         a = np.concatenate(a,axis=1)
         t = np.concatenate(t,axis=1)
 
         R = - t @ np.linalg.inv(a)
+        R = R.T
         return R
 
     def _Arckerman(self,):

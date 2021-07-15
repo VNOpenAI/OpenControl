@@ -56,8 +56,8 @@ class LTI():
         self._C = C 
         self._D = D
         self._states_shape = A.shape[0]
-        
-        #self._outputs_shape = C.shape[0]
+        if C is not None:
+            self._outputs_shape = C.shape[0]
         #input_function = kwargs.get('u')
         #self._x0 = kwargs.get('x0')
         #if self._x0 is not None:
@@ -180,9 +180,7 @@ class LTI():
         for i in range(ndim-2):
             X = A @ X
             M = np.hstack([M,X])          
-        #print(f'M.shape = {M.shape}')
-        #print(M)
-        #print(ndim)
+
         if np.linalg.matrix_rank(M)==ndim:
             return True 
         else:
