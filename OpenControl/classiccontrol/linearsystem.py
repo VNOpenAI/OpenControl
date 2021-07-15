@@ -226,7 +226,7 @@ class LTI():
 
     def setup_simulink(self, max_step=1e-3, algo='RK45', t_sim=(0,10), x0=None, sample_time = 1e-2,z0=None):
         # fixed step_size
-        """Run this function before any simulations. This method set the necessary params for running simulink.
+        """Run this function before any simulations. This method set the necessary params for running simulation.
 
         Args:
             max_step (float, optional): define max step for ODEs solver algorithms. Defaults to 1e-3.
@@ -259,7 +259,7 @@ class LTI():
         else: 
             self._z0 = z0
     def step_response(self,input_function=None,logs_file =None):
-        """simulink behavior of Opne-Loop system
+        """simulate behavior of Opne-Loop system
             Run self.setup_simulink() before running this this method
 
         Args:
@@ -269,6 +269,8 @@ class LTI():
             logs_file ([string], optional): [path to logs folder,]. Defaults to None.
 
         Returns:
+            time_array : 2D-np.ndarray
+                time series to simulate
             x_out: 2D-np.ndarray
                 state of system in time series ,between self.t_sim
             y_out: 2D-np.ndarray
@@ -314,10 +316,10 @@ class LTI():
         if logs_file is not None:
             pass
 
-        return x_out ,y_out# ndim, num_time_point
+        return time_array,x_out ,y_out# ndim, num_time_point
         
     def apply_state_feedback(self,R,input_function=None,logs_file =None):
-        """ simulink the behavior of close-loop system (feedback_system)
+        """ simulate the behavior of close-loop system (feedback_system)
             Run self.setup_simulink() before running this this method
 
         Args:
@@ -325,9 +327,12 @@ class LTI():
                 state_feedback_matrix
             input_function: function
         Returns:
+            time_array : 2D-np.ndarray
+                time series to simulate
             x_out: 2D-np.ndarray
-                state of cl
+                state of system in time series ,between self.t_sim
             y_out: 2D-np.ndarray
+                output of system in time series,
         """
         A_old = self._A 
         self._A = self._A - self._B@R
@@ -352,22 +357,23 @@ class LTI():
                 return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
             else: 
                 return self._C @ x.reshape(-1,1)
-        def function_z(t,z,x,y):
+        def function_z(t,z,y):
             if self._D is not None:
-                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y-self._C@z.reshape(-1,1)-self._D@(input_function(t).reshape(-1,1)))
+                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y.reshape(-1,1)-self._C@z.reshape(-1,1)-self._D@(input_function(t).reshape(-1,1)))
             else:
-                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y-self._C@z.reshape(-1,1))
+                out = self._A @ z.reshape(-1,1) + self._B @ (input_function(t).reshape(-1,1)) + L@(y.reshape(-1,1)-self._C@z.reshape(-1,1))
             return out.ravel()
         i_old = time_start 
         time_array = np.linspace(time_start+sample_time,time_stop,int((time_stop-time_start)//sample_time))
         
         x_out = []
         y_out = []
+        z_out = []
         for i in time_array:
             #print(x0.shape)
             result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),max_step=self.max_step,method=self.algo)
             x0 = result.y.T[-1]  #x0 shape (n,)
-            i_old = i
+            
             x_out.append(x0) 
             if self._C is not None:
                 y = function_out(i,x0).reshape(-1)
@@ -375,18 +381,83 @@ class LTI():
             else: 
                 y_out = None
             result_z = scipy.integrate.solve_ivp(function_z, t_span=(i_old,i), y0 = z0.reshape(-1),
-                        max_step=self.max_step,method=self.algo, args = (x0,y))
+                        max_step=self.max_step,method=self.algo, args = (y,))
             z0 = result_z.y.T[-1]
-            print(f'z0={z0}')
-        
+            z_out.append(z0)
+           # print(f'z0.shape={z0.shape}')
+           # print(f'x0.shape={x0.shape}')
+            i_old = i
         x_out = np.array(x_out)
+        y_out = np.array(y_out)
+        z_out = np.array(z_out)
         x_out = x_out.T
         y_out = y_out.T
+        z_out = z_out.T
         if logs_file is not None:
             pass
 
-        return x_out ,y_out# ndim, num_time_point
+        return time_array,x_out ,y_out,z_out# ndim, num_time_point
         
 
+    def apply_output_feedback(self,L,R,input_function=None,logs_file =None):
 
+        sample_time = self.sample_time 
+        time_start = self.t_sim[0]
+        time_stop = self.t_sim[-1]      
+
+        if input_function is None:
+            input_function = lambda t: np.zeros((self._inputs_shape,1))
+        x0 = self._x0
+        z0 = self._z0
+        def function_x (t,x,z):
+            u = input_function(t).reshape(-1,1) - R@z.reshape(-1,1)
+            out = self._A @ x.reshape(-1,1) + self._B @ (u)
+            return out.ravel()
+        def function_out(t,x):     
+            if self._D is not None: 
+                return self._C @ x.reshape(-1,1) + self._D @ input_function(t).reshape(-1,1) 
+            else: 
+                return self._C @ x.reshape(-1,1)
+        def function_z(t,z,y):
+            u = input_function(t).reshape(-1,1) - R@z.reshape(-1,1)
+            if self._D is not None:
+                out = self._A @ z.reshape(-1,1) + self._B @ u + L@(y.reshape(-1,1)-self._C@z.reshape(-1,1)-self._D@(u))
+            else:
+                out = self._A @ z.reshape(-1,1) + self._B @ (u) + L@(y.reshape(-1,1)-self._C@z.reshape(-1,1))
+            return out.ravel()
+        i_old = time_start 
+        time_array = np.linspace(time_start+sample_time,time_stop,int((time_stop-time_start)//sample_time))
+        
+        x_out = []
+        y_out = []
+        z_out = []
+        for i in time_array:
+            #print(x0.shape)
+            result = scipy.integrate.solve_ivp(function_x, t_span=(i_old,i), y0 = x0.reshape(-1),
+                        max_step=self.max_step,method=self.algo,args=(z0,))
+            x0 = result.y.T[-1]  #x0 shape (n,)
+            
+            x_out.append(x0) 
+            if self._C is not None:
+                y = function_out(i,x0).reshape(-1)
+                y_out.append(y)
+            else: 
+                y_out = None
+            result_z = scipy.integrate.solve_ivp(function_z, t_span=(i_old,i), y0 = z0.reshape(-1),
+                        max_step=self.max_step,method=self.algo, args = (y,))
+            z0 = result_z.y.T[-1]
+            z_out.append(z0)
+           # print(f'z0.shape={z0.shape}')
+           # print(f'x0.shape={x0.shape}')
+            i_old = i
+        x_out = np.array(x_out)
+        y_out = np.array(y_out)
+        z_out = np.array(z_out)
+        x_out = x_out.T
+        y_out = y_out.T
+        z_out = z_out.T
+        if logs_file is not None:
+            pass
+
+        return time_array,x_out ,y_out,z_out# ndim, num_time_point
 
