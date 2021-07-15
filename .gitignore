@@ -7,8 +7,7 @@ docs/_build
 *.ipynb
 logs
 __pycache__
-test_case.py
-testcasse_linearSystem.py
+test
 dist
 OpenControl.egg-info
 .pypirc
