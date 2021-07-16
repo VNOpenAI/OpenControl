@@ -11,7 +11,8 @@ the main object of module is LTI system and relative algorithms, controller,...
 The Linear time-invariant system formulate in:
 
 .. math:: 
-    \dot{x} = Ax + Bu \\\\
+
+    \dot{x} = Ax + Bu \\
     y = Cx + Du
 
 
@@ -41,7 +42,7 @@ This package contains:
     
     - **observer.py**: Design observer for LTI 
             - Luenberger observer
-            - Kalman observer
+            
     
     - **utils.py**: collection of small and common Python functions which re-use a lots in difference package 
 
@@ -93,6 +94,9 @@ Kalman standard:
 Hatus standard: 
     System is controllable if matrix: is full rank with any s.
 
+.. math::
+    Rank(sI - A, B) = n
+
     System is observable if matrix:  is full rank 
 
 Stability
@@ -100,13 +104,18 @@ Stability
 
 Gerschgorin: 
     A is system matrix. Elements of A, aij. 
-    Ri(A) = sum(abs(aij)) 
+
+.. math::
+
+    Ri(A) = \sum_{j=1, j\neq i}|a_{ij}
 
 Hurwitz: 
     system is stable if all the eigen values of system matrix on the left of complex coordinate
 
 Lyapunov:
-
+    a) A is hurwitz, If there exist a positive definite squad matrix :math:`Q=Q^T` such that :math:`P=-(QA + A^TQ)` is a positive definite matrix
+    b) A is hurwitz ,If there exist a positive definite squad matrix :math:`P=P^T` such that 
+    equation :math:`P=-(QA + A^TQ)` got a solution :math:`Q` and Q is positive definite squad matrix
 
 Stability of system:
 
@@ -119,7 +128,7 @@ Stability of system:
     sys.is_stable(algorimth='lyapunov')
     
 
-Code examples
+Code examples 1
 ================================================================
 
 This experiment from the paper 'Observer-Based Controllers for Two-Wheeled Inverted Robots with Unknown Input Disturbance and Model Uncertainty'
@@ -166,26 +175,98 @@ simulate Open-loop system.
 Design controller
 
 .. code-block:: python
+
     controller = classiccontrol.controller.PoleStatement(pole=[-3,-4,-5,-6], system=sys)
     R = controller.compute()
 
 Design observer 
 
 .. code-block:: python
+
     observer = classiccontrol.observer.Luenberger(pole=[-3,-4,-5,-6], system=sys)
     L = observer.compute()
 
 simulate Closed-loop system with state-feedback controller R
 
 .. code-block:: python
+
     sys.setup_simulink()
     time_array,state,output,state_obs = sys.apply_state_feedback(R)
 
 simulate Closed-loop system with output-feedback L-R 
 
 .. code-block:: python
+
     sys.setup_simulink()
     time_array,state,output,state_obs = sys.apply_output_feedback(L,R)
 
+Code examples 2
+================================================================
+
+simulate a Two-Wheeled Inverted Rotbots.
+cited in the `paper`_ ‘Observer-Based Controllers for Two-Wheeled Inverted Robots with Unknown Input Disturbance and Model Uncertainty’
+
+.. _`paper`: https://www.researchgate.net/publication/342700374_Observer-Based_Controllers_for_Two-Wheeled_Inverted_Robots_with_Unknown_Input_Disturbance_and_Model_Uncertainty
+
+object got the folowing parameters:
+
+.. image:: ./_static/object.png
+
+Simulate behavior of open-loop system
+Design LQR controller
+Simulate behavior of closed-loop system with LQR controller 
+
+.. code-block:: python
+
+    import numpy as np 
+    from OpenControl import classiccontrol
+    A = np.array([0,0,0,1,0,0,0,0,0,0,1,0,0,0,0,
+            0,0,1,0,-14.5,0,-32.47,1.07,0,0,162.07,
+            0,242.88,-8.01,0,0,0,0,0,0,-5.66]).reshape(6,6)
+    B = np.array([0,0,0,0,0,0,107.159,107.159,-801.536,
+            -801.536,-191.648,191.648]).reshape(6,2)
+    C = np.eye(6)
+    Q = np.diag([4,3,20,3.5,0.001,0.9])
+    R = np.diag([1,1])
+    sys = classiccontrol.linearsystem.LTI(A=A,B=B,C=C)
+    ctl = classiccontrol.controller.LQR(sys,Q,R)
+    R = ctl.compute()
+    sys.setup_simulink(t_sim=(0,2))
+    time_array, state,output = sys.step_response()
+    time_array2, state2,output2 = sys.apply_state_feedback(R)
+
+.. image:: ./_static/1.png 
+
+.. image:: ./_static/2.png 
+
+
+Design and simulate pole-statement controller 1 with pre-define poles : -1,-2,-3,-4,-5,-6
+Design and simulate pole-statement controller 2 with pre-define poles : -5,-7,-9,-11,-14,-15
+Design Luenberger observer with pre-define poles : -7,-8,-9,-10,-11,-12
+Design Luenberger observer with pre-define poles : -16,-17,-18,-19,-20,-21
+
+.. code-block:: python
+
+    ctl_1 = classiccontrol.controller.PoleStatement(pole=[-1,-2,-3,-4,-5,-6],system=sys)
+    R1 =ctl_1.compute()
+    obs_1 = classiccontrol.observer.Luenberger(pole=[-7,-8,-9,-10,-11,-12],system=sys)
+    L1 = obs_1.compute()
+    ctl_2 = classiccontrol.controller.PoleStatement(pole=[-5,-7,-9,-11,-14,-15],system=sys)
+    R2 =ctl_2.compute()
+    obs_2 = classiccontrol.observer.Luenberger(pole=[-16,-17,-18,-19,-20,-21],system=sys)
+    L2 = obs_2.compute()
+    sys.setup_simulink(t_sim=(0,50))#,x0=np.random.randint(-1,1,(6,1)))
+    time_array1, state1,output1 = sys.apply_output_feedback(L1,R1)
+    time_array2, state2,output2 = sys.apply_output_feedback(L1,R1)
+    time_array3, state3,output3,z0 = sys.apply_output_feedback(L1,R1)
+    time_array4, state4,output4,z1 = sys.apply_output_feedback(L2,R2)
+
+.. image:: ./_static/3.png 
+
+.. image:: ./_static/4.png 
+
+.. image:: ./_static/5.png 
+
+.. image:: ./_static/6.png 
 
 
