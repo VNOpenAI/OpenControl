@@ -122,6 +122,7 @@ Stability of system:
 Code examples
 ================================================================
 
+This experiment from the paper 'Observer-Based Controllers for Two-Wheeled Inverted Robots with Unknown Input Disturbance and Model Uncertainty'
 Declare LTI system:
 
 .. code-block:: python

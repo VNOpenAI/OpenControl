@@ -56,8 +56,8 @@ class Luenberger():
     def _Arckerman(self,):
         #@if self._B is None:
         #    raise ValueError('please provide B matrix')
-        A = self.system._A 
-        B = self.system.C
+        A = self.system._A.T
+        B = self.system.C.T
         M = B
         ndim = self.system._states_shape
         if ndim==1:
@@ -79,7 +79,8 @@ class Luenberger():
         for i in range(ndim+1):
             coeffi = coefficient[i]          
             S += coeffi*(s@np.linalg.matrix_power(A,i))
-        return S
+
+        return S.T
 
     def compute(self):
         observability = self.system.is_observable()

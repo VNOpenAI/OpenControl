@@ -36,6 +36,7 @@ class PoleStatement(StateFeedBackController):
         if self.system.inputs_shape != 1 and algo=='Arckerman':
             print('The Arckerman method only design for 1D_input system. Automatically switch to Ropernecker method')
             self.algo = 'Ropernecker'
+        print(self.algo)
         #self.system = system
 
     def _Roppernecker(self,):
